@@ -81,6 +81,39 @@ class Solution {
 	}
 ```
 
+### [3.面试题01.01 判定字符串是否唯一](https://leetcode-cn.com/problems/is-unique-lcci/)
+
+实现一个算法，确定一个字符串 s 的所有字符是否全都不同。
+
+示例 1：
+
+输入: s = "leetcode"
+输出: false 
+示例 2：
+
+输入: s = "abc"
+输出: true
+
+> HashSet辅助结构解题
+
+```java
+class Solution {
+    public boolean isUnique(String astr) {
+        char[] dict = astr.toCharArray();
+	    	// 辅助结构
+	    	HashSet<Character> hashSet = new HashSet<>();
+	    	for(int i=0;i<dict.length;i++) {
+	    		if(!hashSet.isEmpty() && hashSet.contains(dict[i])) {
+	    			return false;
+	    		}else {
+	    			hashSet.add(dict[i]);
+	    		}
+	    	}
+	    	return true;
+    }
+}
+```
+
 
 
 ## 排序+辅助结构解题
