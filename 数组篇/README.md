@@ -1614,6 +1614,70 @@ class Solution {
 }
 ```
 
+### [1.Leetcode63不同路径II](https://leetcode-cn.com/problems/unique-paths-ii/)
+
+一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为“Start” ）。
+
+机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为“Finish”）。
+
+现在考虑网格中有障碍物。那么从左上角到右下角将会有多少条不同的路径？
+
+网格中的障碍物和空位置分别用 1 和 0 来表示。
+
+示例 1：
+
+![img](https://assets.leetcode.com/uploads/2020/11/04/robot1.jpg)
+
+输入：obstacleGrid = [[0,0,0],[0,1,0],[0,0,0]]
+输出：2
+解释：
+3x3 网格的正中间有一个障碍物。
+从左上角到右下角一共有 2 条不同的路径：
+
+1. 向右 -> 向右 -> 向下 -> 向下
+2. 向下 -> 向下 -> 向右 -> 向右
+示例 2：
+
+> 解题思路：还是动态规划，无非就是判断数组为0还是1，为1的话则有障碍物，过不去了。
+
+```java
+class Solution {
+	    public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+	    	// 定义 初始化 转移方程
+	    	int n  = obstacleGrid.length;
+	    	int m  = obstacleGrid[0].length;
+	    	int[][] dp = new int[n][m];
+	    	// 初始化
+	    	for(int i=0;i<n;i++) {
+	    		// 如果遇到一个障碍物 后面无法走到
+	    		if(obstacleGrid[i][0]==1) {
+	    			break;
+	    		}
+	    		dp[i][0] = 1;
+	    	}
+	    	for(int j=0;j<m;j++) {
+	    		//遇到障碍物，后面无法走到
+	    		if(obstacleGrid[0][j]==1) {
+	    			break;
+	    		}
+	    		dp[0][j] = 1;
+	    	}
+	    	// 转移方程
+	    	for(int i=1;i<n;i++) {
+	    		for(int j=1;j<m;j++) {
+	    			//主要看当前是否为障碍物
+	    			dp[i][j] = obstacleGrid[i][j]==1?0:dp[i-1][j]+dp[i][j-1];
+	    		}
+	    	}
+	    	return dp[n-1][m-1];
+	    }
+	}
+```
+
+
+
+
+
 ### [1.Leetcode064最小路径和](https://leetcode-cn.com/problems/minimum-path-sum/)
 
 给定一个包含非负整数的 m x n 网格 grid ，请找出一条从左上角到右下角的路径，使得路径上的数字总和为最小。
