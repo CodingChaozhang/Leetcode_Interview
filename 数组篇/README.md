@@ -114,6 +114,125 @@ class Solution {
 }
 ```
 
+### [4.Leetcode041缺失的第一个正数](https://leetcode-cn.com/problems/first-missing-positive/)
+
+给你一个未排序的整数数组 nums ，请你找出其中没有出现的最小的正整数。
+
+进阶：你可以实现时间复杂度为 O(n) 并且只使用常数级别额外空间的解决方案吗？
+
+示例 1：
+
+输入：nums = [1,2,0]
+输出：3
+
+示例 2：
+
+输入：nums = [3,4,-1,1]
+输出：2
+
+示例 3：
+
+输入：nums = [7,8,9,11,12]
+输出：1
+
+> 解题思路1：直接用HashSet来解题，但是空间复杂度不符合要求
+
+```java
+public int firstMissingPositive(int[] nums) {
+	    	// 用HashSet辅助，但是不符合常数数组的原则
+	    	HashSet<Integer> hashset = new HashSet<>();
+	    	for(int num:nums) {
+	    		hashset.add(num);
+	    	}
+	    	// 从容器中查看
+	    	for(int i=1;i<=nums.length;i++) {
+	    		if(!hashset.contains(i)) {
+	    			return i;
+	    		}
+	    	}
+	    	return nums.length+1;
+	    }
+```
+
+> 解题思路2：既然用HashSet额外的增加了空间复杂度，那么可不可以直接在原数组上进行修改呢？
+>
+> 通过将数组中的值放置于对应的索引位置上，1放置索引0 上，3放置索引位置2上。
+>
+> 之后对其遍历，查看其值是否与当前索引值相同，如果不同，则返回
+
+```java
+//常数空间在原数组上直接操作
+	    public int firstMissingPositive_2(int[] nums) {
+	    	// 把每个数放到对应索引位置上 比如3放到索引位置2上，之后检查当前数和索引值是否等 不等则返回索引值+1
+	    	
+	    	int len = nums.length;
+	    	for(int i=0;i<len;i++) {
+	    		// 符合条件才放到对应索引位置上 有的数大于0或者len了
+	    		while(nums[i]>0&&nums[i]<=len&&(nums[i]!=nums[nums[i]-1])) {
+	    			swap(nums,i,nums[i]-1);
+	    		}
+	    	}
+	    	
+	    	// 之后检查
+	    	for(int i=0;i<len;i++) {
+	    		if(nums[i]!=i+1) {
+	    			return i+1;
+	    		}
+	    	}
+	    	return len+1;
+	    }
+	    // 交换
+	    public void swap(int[] nums,int i,int j) {
+	    	int temp = nums[i];
+	    	nums[i]  = nums[j];
+	    	nums[j]  = temp;
+	    }
+```
+
+### [4.Leetcode217存在重复元素](https://leetcode-cn.com/problems/contains-duplicate/)
+
+给定一个整数数组，判断是否存在重复元素。
+
+如果存在一值在数组中出现至少两次，函数返回 true 。如果数组中每个元素都不相同，则返回 false 。
+
+ 
+
+示例 1:
+
+输入: [1,2,3,1]
+输出: true
+
+示例 2:
+
+输入: [1,2,3,4]
+输出: false
+
+示例 3:
+
+输入: [1,1,1,3,3,4,3,2,4,2]
+输出: true
+
+> 解题思路：一方面直接排序，看相邻
+>
+> 另外一方面直接用辅助结构HashSet
+
+```java
+class Solution {
+    public boolean containsDuplicate(int[] nums) {
+	    	// 第一种对其用HashSet辅助结构来解题
+	    	HashSet<Integer> hashSet = new HashSet<Integer>();
+	    	for(int num:nums) {
+	    		if(!hashSet.contains(num)) {
+	    			hashSet.add(num);
+	    		}else {
+	    			return true;
+	    		}
+	    	}
+	    	return false;
+ 	    }
+}
+```
+
 
 
 ## 排序+辅助结构解题
@@ -722,6 +841,49 @@ public int largestPerimeter_2(int[] A) {
         }
         return 0;
     }
+```
+
+### [5.Leetcode016最接近的三数之和](https://leetcode-cn.com/problems/3sum-closest/)
+
+给定一个包括 n 个整数的数组 nums 和 一个目标值 target。找出 nums 中的三个整数，使得它们的和与 target 最接近。返回这三个数的和。假定每组输入只存在唯一答案。
+
+ 
+
+示例：
+
+输入：nums = [-1,2,1,-4], target = 1
+输出：2
+解释：与 target 最接近的和是 2 (-1 + 2 + 1 = 2) 。
+
+> 解题思路：还是之前的排序+双指针的思路，无非就是判断标准不一样了。
+
+```java
+class Solution {
+    public int threeSumClosest(int[] nums, int target) {
+            // 排序+双指针即可
+	    	Arrays.sort(nums);
+            // 初始化的方式
+	    	int res  = nums[0]+nums[1]+nums[2];
+	    	for(int i=0;i<nums.length-2;i++) {
+	    		int left = i+1;
+	    		int right = nums.length-1;
+	    		// while循环
+	    		while(left<right) {
+	    			// 当前值
+		    		int temp_target = nums[i] + nums[left] + nums[right];
+                    res = (Math.abs(target-res))>(Math.abs(target-temp_target))?temp_target:res;
+		    		if(temp_target==target) {
+		    			return temp_target;
+		    		}else if(temp_target<target) {
+		    			left++;
+		    		}else {
+		    			right--;
+		    		}
+	    		}
+	    	}
+	    	return res;
+    }
+}
 ```
 
 
@@ -1478,6 +1640,133 @@ class Solution {
 }
 ```
 
+### [4.Leetcode054螺旋矩阵](https://leetcode-cn.com/problems/spiral-matrix/)
+
+给定一个包含 m x n 个元素的矩阵（m 行, n 列），请按照顺时针螺旋顺序，返回矩阵中的所有元素。
+
+示例 1:
+
+输入:
+[
+ [ 1, 2, 3 ],
+ [ 4, 5, 6 ],
+ [ 7, 8, 9 ]
+]
+输出: [1,2,3,6,9,8,7,4,5]
+
+示例 2:
+
+输入:
+[
+  [1, 2, 3, 4],
+  [5, 6, 7, 8],
+  [9,10,11,12]
+]
+输出: [1,2,3,4,8,12,11,10,9,5,6,7]
+
+> 解题思路：按层数 一层一层的处理，无非就是记得对里面剩下一行或者一列的情况处理
+
+```java
+class Solution {
+		// 存储结果
+    	List<Integer> res = new ArrayList<>();
+	    public List<Integer> spiralOrder(int[][] matrix) {
+	    	// 存储结果
+ 	    	int start_row = 0;
+	    	int start_col = 0;
+	    	int end_row   = matrix.length-1;
+	    	int end_col   = matrix[0].length-1;
+	    	//while循环
+	    	while(start_row<=end_row&&start_col<=end_col) {
+	    		printCircle(matrix,start_row++,start_col++,end_row--,end_col--);
+	    	}
+	    	return res;
+	    }
+	    // 打印图形
+	    public void printCircle(int[][] matrix,int start_row,int start_col,int end_row,int end_col) {
+
+	    	// 开始
+	    	for(int i=start_col;i<=end_col;i++) {
+	    		res.add(matrix[start_row][i]);
+	    	}
+	    	for(int i=start_row+1;i<=end_row;i++) {
+	    		res.add(matrix[i][end_col]);
+	    	}
+
+            // 如果已经结束了
+	    	if(start_row==end_row || start_col == end_col) {
+	    		return;
+	    	}
+            
+	    	for(int i=end_col-1;i>start_col;i--) {
+	    		res.add(matrix[end_row][i]);
+	    	}
+	    	for(int i=end_row;i>start_row;i--) {
+	    		res.add(matrix[i][start_col]);
+	    	}
+	    	
+	    }
+	}
+```
+
+### [4.剑指Offer29顺时针打印矩阵](https://leetcode-cn.com/problems/shun-shi-zhen-da-yin-ju-zhen-lcof/)
+
+输入一个矩阵，按照从外向里以顺时针的顺序依次打印出每一个数字。
+
+ 
+
+示例 1：
+
+输入：matrix = [[1,2,3],[4,5,6],[7,8,9]]
+输出：[1,2,3,6,9,8,7,4,5]
+
+示例 2：
+
+输入：matrix = [[1,2,3,4],[5,6,7,8],[9,10,11,12]]
+输出：[1,2,3,4,8,12,11,10,9,5,6,7]
+
+```java
+class Solution {
+    public int[] spiralOrder(int[][] matrix) {
+         if(matrix.length==0||matrix[0].length==0){
+             return new int[]{};
+         }
+         int start_row = 0;
+	        int start_col = 0;
+	        int end_row   = matrix.length-1;
+	        int end_col   = matrix[0].length-1;
+	        int[] res       = new int[matrix.length*matrix[0].length];
+	        int index	  = 0;
+	        while(start_row<=end_row&&start_col<=end_col) {
+	        	// 开始遍历
+	        	for(int i=start_col;i<=end_col;i++) {
+	        		res[index++] = matrix[start_row][i];
+	        	}
+	        	for(int i=start_row+1;i<=end_row;i++) {
+	        		res[index++] = matrix[i][end_col];
+	        	}
+	        	// 判断是否为单列
+	        	if(start_row!=end_row) {
+	        		for(int i=end_col-1;i>=start_col;i--) {
+	        			res[index++] = matrix[end_row][i];
+	        		}
+	        	}
+	        	// 判断是否为单行
+	        	if(start_col!=end_col) {
+	        		for(int i=end_row-1;i>start_row;i--) {
+	        			res[index++] = matrix[i][start_col];
+	        		}
+	        	}
+	        	start_row++;
+	        	start_col++;
+	        	end_row--;
+	        	end_col--;
+	        }
+	        return res;
+    }
+}
+```
+
 
 
 ## 动态规划辅助解题
@@ -1898,6 +2187,72 @@ public class Leetcode0120 {
 	}
 }
 
+```
+
+### [5.Leetcode509 裴波那契数](https://leetcode-cn.com/problems/fibonacci-number/)
+
+斐波那契数，通常用 F(n) 表示，形成的序列称为 斐波那契数列 。该数列由 0 和 1 开始，后面的每一项数字都是前面两项数字的和。也就是：
+
+F(0) = 0，F(1) = 1
+F(n) = F(n - 1) + F(n - 2)，其中 n > 1
+给你 n ，请计算 F(n) 。
+
+ 
+
+示例 1：
+
+输入：2
+输出：1
+解释：F(2) = F(1) + F(0) = 1 + 0 = 1
+
+示例 2：
+
+输入：3
+输出：2
+解释：F(3) = F(2) + F(1) = 1 + 1 = 2
+
+示例 3：
+
+输入：4
+输出：3
+解释：F(4) = F(3) + F(2) = 2 + 1 = 3
+
+> 解题思路：递归
+
+```java
+// 递归
+		public int fib(int n) {
+	    	if(n==0) {
+	    		return 0;
+	    	}
+	    	if(n==1) {
+	    		return 1;
+	    	}
+	    	return fib(n-1)+fib(n-2);
+	    }
+```
+
+> 解题思路：动态规划
+
+```java
+// 动归解题
+		public int fib_2(int n) {
+	    	if(n==0) {
+	    		return 0;
+	    	}
+	    	if(n==1) {
+	    		return 1;
+	    	}
+	    	int f0 = 0;
+	    	int f1 = 1;
+	    	int f = 0;
+	    	for(int i=2;i<=n;i++) {
+	    		f  = f0 + f1;
+	    		f0 = f1;
+	    		f1 = f;
+	    	}
+	    	return f;
+	    }
 ```
 
 
