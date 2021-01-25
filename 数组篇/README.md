@@ -233,6 +233,157 @@ class Solution {
 }
 ```
 
+### [5.Leetcode1160拼写单词](https://leetcode-cn.com/problems/find-words-that-can-be-formed-by-characters/)
+
+给你一份『词汇表』（字符串数组） words 和一张『字母表』（字符串） chars。
+
+假如你可以用 chars 中的『字母』（字符）拼写出 words 中的某个『单词』（字符串），那么我们就认为你掌握了这个单词。
+
+注意：每次拼写（指拼写词汇表中的一个单词）时，chars 中的每个字母都只能用一次。
+
+返回词汇表 words 中你掌握的所有单词的 长度之和。
+
+ 
+
+示例 1：
+
+输入：words = ["cat","bt","hat","tree"], chars = "atach"
+输出：6
+解释： 
+可以形成字符串 "cat" 和 "hat"，所以答案是 3 + 3 = 6。
+示例 2：
+
+输入：words = ["hello","world","leetcode"], chars = "welldonehoneyr"
+输出：10
+解释：
+可以形成字符串 "hello" 和 "world"，所以答案是 5 + 5 = 10。
+
+> 解题思路：HashMap单词频率表 对比 来解题，看见字母以及次数考虑HashMap
+
+```java
+class Solution {
+	    public int countCharacters(String[] words, String chars) {
+	    	char[] char_arr = chars.toCharArray();
+	    	// 用HashMap的辅助结构来解题，一方面要知道该单词在不在，另一方要确保其出现次数
+	    	HashMap<Character,Integer> dict = new HashMap<>();
+	    	//对其遍历
+	    	for(int i=0;i<char_arr.length;i++) {
+	    		// 统计字母表以及出现的次数
+	    		dict.put(char_arr[i],dict.getOrDefault(char_arr[i], 0)+1);
+	    	}
+	    	// 词汇表的结果
+	    	int res = 0;
+	    	// 对词汇表遍历
+	    	for(int i=0;i<words.length;i++) {
+	    		// 对每个单词建立一个hashMap
+	    		String word = words[i];
+	    		char[] word_arr = word.toCharArray();
+	    		// 是否掌握了
+	    		boolean flag = true;
+	    		// 词汇表
+	    		HashMap<Character,Integer> word_dict = new HashMap<>();
+	    		for(int j=0;j<word_arr.length;j++) {
+	    			word_dict.put(word_arr[j], word_dict.getOrDefault(word_arr[j],0)+1);
+	    		}
+	    		
+	    		// 对比比较
+	    		for(int k=0;k<word_arr.length;k++) {
+	    			if(!dict.containsKey(word_arr[k])||dict.get(word_arr[k])<word_dict.get(word_arr[k])) {
+	    				flag = false;
+	    				break;
+	    			}
+	    		}
+	    		if(flag) {
+	    			res += word_arr.length;
+	    		}
+	    	}
+	    	return res;
+	    }
+	}
+```
+
+
+
+## HashMap辅助+二叉树解题
+
+### [1.Leetcode105从前序与中序遍历序列中构造二叉树](https://leetcode-cn.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/)
+
+根据一棵树的前序遍历与中序遍历构造二叉树。
+
+注意:
+你可以假设树中没有重复的元素。
+
+例如，给出
+
+> 前序遍历 preorder = [3,9,20,15,7]
+> 中序遍历 inorder = [9,3,15,20,7]
+
+返回如下的二叉树：
+
+```
+ 3
+   / \
+  9  20
+    /  \
+   15   7
+```
+
+> 解题思路：先用HashMap来存储中序遍历，之后在前序和中序找根节点的索引，并调用递归来解题
+
+```java
+/**
+ * Definition for a binary tree node.
+ * public class TreeNode {
+ *     int val;
+ *     TreeNode left;
+ *     TreeNode right;
+ *     TreeNode() {}
+ *     TreeNode(int val) { this.val = val; }
+ *     TreeNode(int val, TreeNode left, TreeNode right) {
+ *         this.val = val;
+ *         this.left = left;
+ *         this.right = right;
+ *     }
+ * }
+ */
+class Solution {
+    	HashMap<Integer,Integer> hashMap = new HashMap<>();
+
+		// 构建二叉树
+		public TreeNode myBuildTree(int[] preorder,int preorder_left,int preoder_right,int[] inorder,int inorder_left,int inorder_right) {
+			if(preorder_left>preoder_right) {
+				return null;
+			}
+			// 找其根节点的索引
+			int preorder_root = preorder_left;
+			int inorder_root = hashMap.get(preorder[preorder_root]);
+			
+			// 构建二叉树走起
+			TreeNode root = new TreeNode(preorder[preorder_root]);
+			// 左子树的个数
+			int left_size = inorder_root-inorder_left;
+			root.left  = myBuildTree(preorder,preorder_left+1,preorder_left+left_size,
+									 inorder, inorder_left,inorder_root-1);
+			root.right = myBuildTree(preorder, preorder_left+left_size+1, preoder_right, 
+									 inorder, inorder_root+1, inorder_right);
+			return root;
+			
+			
+		}
+	    public TreeNode buildTree(int[] preorder, int[] inorder) {
+	    	//构建二叉树 第一部 先拿HashMap存储中序遍历的结果
+	    	for(int i=0;i<inorder.length;i++) {
+	    		hashMap.put(inorder[i],i);
+	    	}
+	    	return myBuildTree(preorder,0,preorder.length-1,inorder,0,inorder.length-1);
+	    }
+	}
+```
+
+
+
+
+
 
 
 ## 排序+辅助结构解题
@@ -886,6 +1037,116 @@ class Solution {
 }
 ```
 
+## 排序辅助解题
+
+### [1.Leetcode1375有多少小于当前数字的数字](https://leetcode-cn.com/problems/how-many-numbers-are-smaller-than-the-current-number/)
+
+给你一个数组 nums，对于其中每个元素 nums[i]，请你统计数组中比它小的所有数字的数目。
+
+换而言之，对于每个 nums[i] 你必须计算出有效的 j 的数量，其中 j 满足 j != i 且 nums[j] < nums[i] 。
+
+以数组形式返回答案。
+
+
+
+示例 1：
+
+输入：nums = [8,1,2,2,3]
+输出：[4,0,1,1,3]
+解释： 
+对于 nums[0]=8 存在四个比它小的数字：（1，2，2 和 3）。 
+对于 nums[1]=1 不存在比它小的数字。
+对于 nums[2]=2 存在一个比它小的数字：（1）。 
+对于 nums[3]=2 存在一个比它小的数字：（1）。 
+对于 nums[4]=3 存在三个比它小的数字：（1，2 和 2）。
+
+示例 2：
+
+输入：nums = [6,5,4,8]
+输出：[2,1,0,3]
+
+示例 3：
+
+输入：nums = [7,7,7,7]
+输出：[0,0,0,0]
+
+> 解题思路一、暴力破解法
+
+```java
+class Solution {
+    public int[] smallerNumbersThanCurrent(int[] nums) {
+        // 对每个数都对其统计
+	    	int[] res = new int[nums.length];
+	    	for(int i=0;i<nums.length;i++) {
+	    		int count = 0;
+	    		for(int j=0;j<nums.length;j++) {
+	    			if(nums[i]>nums[j]) {
+	    				count++;
+	    			}
+	    		}
+	    		res[i] = count;
+	    	}
+	    	return res;
+    }
+}
+```
+
+> 解题思路二、排序+一个辅助的空间结构
+
+```java
+// 排序来解题 但需一个辅助结构来记录之前的索引
+	    public int[] smallerNumbersThanCurrent_2(int[] nums) {
+	    	// 第一维度记录原来数据 第二维度记录之前的索引
+	    	int[][] new_nums = new int[nums.length][nums.length];
+	    	for(int i=0;i<nums.length;i++) {
+	    		new_nums[i][0] = nums[i];
+	    		new_nums[i][1] = i;
+	    	}
+	    	// 对其按照第一维度排序
+	    	Arrays.sort(new_nums,(a,b)->(a[0]-b[0]));
+	    	
+	    	//结果存储
+    		int prev = -1;
+    		int[] res = new int[nums.length];
+	    	// 接下来统计可
+	    	for(int i=0;i<new_nums.length;i++) {
+	    		// 第一个数或者两个数同
+	    		if(prev==-1 || new_nums[i][0]!=new_nums[i-1][0]) {
+	    			prev = i;
+	    		}
+	    		res[new_nums[i][1]] = prev;
+	    	}
+	    	return res;
+	    }
+```
+
+> 解题思路三、最优 计数排序
+
+```java
+// 计数排序 桶排序
+	    public int[] smallerNumbersThanCurrent_3(int[] nums) {
+	    	// 观察数据范围为0-100之间
+	    	int[] bucket = new int[101];
+	    	// 统计每个数出现的频率
+	    	for(int num:nums) {
+	    		bucket[num]++;
+	    	}
+	    	// 之后对其相加
+	    	for(int i=1;i<101;i++) {
+	    		bucket[i] = bucket[i] + bucket[i-1];
+	    	}
+	    	// 结果
+	    	int[] res = new int[nums.length];
+	    	for(int i=0;i<nums.length;i++) {
+	    		// 这里需考虑0
+	    		res[i] = nums[i]==0?0:bucket[nums[i]-1];
+	    	}
+	    	return res;
+	    }
+```
+
+
+
 
 
 ## 双指针(快慢指针)解题
@@ -1340,6 +1601,142 @@ class Solution {
 	    	return new int[] {-1,-1};
     }
 }
+```
+
+### [9.Leetcode1013将数组分成和相等的三个部分](https://leetcode-cn.com/problems/partition-array-into-three-parts-with-equal-sum/)
+
+给你一个整数数组 A，只有可以将其划分为三个和相等的非空部分时才返回 true，否则返回 false。
+
+形式上，如果可以找出索引 i+1 < j 且满足 A[0] + A[1] + ... + A[i] == A[i+1] + A[i+2] + ... + A[j-1] == A[j] + A[j-1] + ... + A[A.length - 1] 就可以将数组三等分。
+
+示例 1：
+
+输入：[0,2,1,-6,6,-7,9,1,2,0,1]
+输出：true
+解释：0 + 2 + 1 = -6 + 6 - 7 + 9 + 1 = 2 + 0 + 1
+
+示例 2：
+
+输入：[0,2,1,-6,6,7,9,-1,2,0,1]
+输出：false
+
+示例 3：
+
+输入：[3,3,6,5,-2,2,5,1,-9,4]
+输出：true
+解释：3 + 3 = 6 = 5 - 2 + 2 + 5 + 1 - 9 + 4
+
+> 解题思路：双指针来解题，双指针开始从左边和右边开始。三等分 其实遍历一遍就知道总和了。
+
+```java
+class Solution {
+    public boolean canThreePartsEqualSum(int[] arr) {
+        // 三等分，遍历完整个数组求和 就知道每份多少了。
+	    	int sum = 0;
+	    	for(int i=0;i<arr.length;i++) {
+	    		sum += arr[i];
+	    	}
+	    	// 如果不能整除 直接返回
+	    	if(sum%3!=0) {
+	    		return false;
+	    	}
+	    	int count = sum/3;
+	    	// 左右指针开始解题
+	    	int left = 0;
+	    	int left_sum = arr[left];
+	    	int right = arr.length-1;
+	    	int right_sum = arr[right];
+	    	while(left+1<right) {
+	    		if(left_sum==count&&right_sum==count) {
+	    			return true;
+	    		}
+	    		
+	    		if(left_sum!=count) {
+	    			left_sum += arr[++left];
+	    		}
+	    		
+	    		if(right_sum!=count) {
+	    			right_sum += arr[--right];
+	    		}
+	    		
+	    	}
+	    	return false;
+    }
+}
+```
+
+### [10.Leetcode189旋转数组](https://leetcode-cn.com/problems/rotate-array/)
+
+给定一个数组，将数组中的元素向右移动 k 个位置，其中 k 是非负数。
+
+ 
+
+进阶：
+
+尽可能想出更多的解决方案，至少有三种不同的方法可以解决这个问题。
+你可以使用空间复杂度为 O(1) 的 原地 算法解决这个问题吗？
+
+
+示例 1:
+
+输入: nums = [1,2,3,4,5,6,7], k = 3
+输出: [5,6,7,1,2,3,4]
+解释:
+向右旋转 1 步: [7,1,2,3,4,5,6]
+向右旋转 2 步: [6,7,1,2,3,4,5]
+向右旋转 3 步: [5,6,7,1,2,3,4]
+
+示例 2:
+
+输入：nums = [-1,-100,3,99], k = 2
+输出：[3,99,-1,-100]
+解释: 
+向右旋转 1 步: [99,-1,-100,3]
+向右旋转 2 步: [3,99,-1,-100]
+
+> 解题思路：旋转数组原地旋转的解题思路 可用翻转数组来实现。
+>
+> 翻转数组给出左右指针 同时移动  替换即可了。无非就是确定中间位置。
+
+```java
+// 粗暴的方法 直接新建一个数组，之前i的位置变为 (i+k)%nums.length
+	    public void rotate(int[] nums, int k) {
+	    	int[] arr = new int[nums.length];
+	    	for(int i=0;i<nums.length;i++) {
+	    		arr[(i+k)%nums.length]  = nums[i];
+	    	}
+	    	System.arraycopy(arr,0,nums,0,nums.length);
+	    }
+```
+
+
+
+```java
+//通过反转数组来实现，整体先反转，前半分翻转 后半部分翻转
+	    // 确定前半分k%nums.length-1 即k=3 翻转的是0-2索引
+	    // 1 2 3 4 5 6 7
+	    // 7 6 5 4 3 2 1
+	    // 5 6 7 4 3 2 1
+	    // 5 6 7 1 2 3 4
+	    public void rotate_2(int[] nums, int k) {
+	    	int index = k%nums.length - 1;
+	    	reverse(nums,0,nums.length-1);
+	    	reverse(nums,0,index);
+	    	reverse(nums,index+1,nums.length-1);
+	    }
+	    
+	    // 翻转数组 左右双指针，同时移动 替换
+	    public void reverse(int[] nums,int left,int right) {
+	    	while(left<right) {
+	    		int temp   = nums[left];
+	    		nums[left] = nums[right];
+	    		nums[right]= temp;
+	    		
+	    		left++;
+	    		right--;
+	    	}
+	    	
+	    }
 ```
 
 
@@ -2255,9 +2652,49 @@ F(n) = F(n - 1) + F(n - 2)，其中 n > 1
 	    }
 ```
 
+### [6.Leetcode746使用最小花费爬楼梯](https://leetcode-cn.com/problems/min-cost-climbing-stairs/)
+
+数组的每个下标作为一个阶梯，第 i 个阶梯对应着一个非负数的体力花费值 cost[i]（下标从 0 开始）。
+
+每当你爬上一个阶梯你都要花费对应的体力值，一旦支付了相应的体力值，你就可以选择向上爬一个阶梯或者爬两个阶梯。
+
+请你找出达到楼层顶部的最低花费。在开始时，你可以选择从下标为 0 或 1 的元素作为初始阶梯。
+
+ 
+
+示例 1：
+
+输入：cost = [10, 15, 20]
+输出：15
+解释：最低花费是从 cost[1] 开始，然后走两步即可到阶梯顶，一共花费 15 。
+
+ 示例 2：
+
+输入：cost = [1, 100, 1, 1, 1, 100, 1, 1, 100, 1]
+输出：6
+解释：最低花费方式是从 cost[0] 开始，逐个经过那些 1 ，跳过 cost[3] ，一共花费 6 。
+
+```java
+class Solution {
+    public int minCostClimbingStairs(int[] cost) {
+            int[] dp = new int[cost.length];
+	    	//初始化
+	    	dp[0] = cost[0];
+	    	dp[1] = cost[1];
+	    	// 不一定非得到最后一个 倒数第二个也可以
+	    	for(int i=2;i<cost.length;i++) {
+	    		// 当前值=前一家 前两家
+	    		dp[i] = Math.min(dp[i-1], dp[i-2]) + cost[i];
+	    	}
+	    	//返回值
+	    	return Math.min(dp[cost.length-1], dp[cost.length-2]);
+    }
+}
+```
 
 
-## 回溯解题
+
+## 溯解题
 
 ```java
 def backward():
@@ -2639,7 +3076,443 @@ public class Leetcode040 {
 
 ```
 
+### [7.Leetcode077组合](https://leetcode-cn.com/problems/combinations/)
 
+给定两个整数 n 和 k，返回 1 ... n 中所有可能的 k 个数的组合。
+
+示例:
+
+输入: n = 4, k = 2
+输出:
+[
+  [2,4],
+  [3,4],
+  [2,3],
+  [1,2],
+  [1,3],
+  [1,4],
+]
+
+> 解题思路：类似于子集的问题，无非就是有长度的限制。
+
+```java
+class Solution {
+		List<Integer> temp = new ArrayList<>();
+		List<List<Integer>> res = new ArrayList<>();
+	    public List<List<Integer>> combine(int n, int k) {
+	    	// 回溯算法
+	    	dfs(1,n,k);
+	    	return res;
+	    }
+	    public void dfs(int cur,int n,int k) {
+	    	// 长度限制即递归结束条件
+	    	if(temp.size() + (n-cur+1) < k || temp.size()>k) {
+	    		return;
+	    	}
+	    	// 满足条件的话
+	    	if(temp.size()==k) {
+	    		// 添加
+	    		res.add(new ArrayList<>(temp));
+	    		return;
+	    	}
+	    	
+	    	// for循环
+	    	for(int i=cur;i<=n;i++) {
+	    		temp.add(i);
+	    		dfs(i+1,n,k);
+	    		temp.remove(temp.size()-1);
+	    	}
+	    	
+	    }
+	}
+```
+
+
+
+### [8.Leetcode216组合总和III](https://leetcode-cn.com/problems/combination-sum-iii/)
+
+找出所有相加之和为 n 的 k 个数的组合。组合中只允许含有 1 - 9 的正整数，并且每种组合中不存在重复的数字。
+
+说明：
+
+所有数字都是正整数。
+解集不能包含重复的组合。 
+示例 1:
+
+输入: k = 3, n = 7
+输出: [[1,2,4]]
+示例 2:
+
+输入: k = 3, n = 9
+输出: [[1,2,6], [1,3,5], [2,3,4]]
+
+> 解题思路：看成子集问题，只不过有长度限制，满足长度之后看是否满足总和的要求。
+
+```java
+class Solution {
+	    // 解题思路:从9个数中挑选k个数，符合总和n则加入进去
+		List<Integer> temp = new ArrayList<>();
+		List<List<Integer>> res = new ArrayList<>();
+		public List<List<Integer>> combinationSum3(int k, int n) {
+			//从9个数挑选k个数
+			dfs(1,9,k,n);
+			return res;
+	    }
+		// 回溯
+		public void dfs(int cur,int n,int k,int sum) {
+			// 递归截止条件
+			if(temp.size()+(n-cur+1) < k || temp.size()>k) {
+				return;
+			}
+			if(temp.size()==k) {
+				int tempSum = 0;
+				for(int num:temp) {
+					tempSum+=num;
+				}
+				if(tempSum==sum) {
+					// 加入
+					res.add(new ArrayList<>(temp));
+				}
+				
+			}
+			// for循环
+			for(int i=cur;i<=n;i++) {
+				// 判断是否满足条件
+					temp.add(i);
+					dfs(i+1, n, k, sum);
+					temp.remove(temp.size()-1);
+			}
+		}
+	}
+```
+
+
+
+### [9.Leetcode79单词搜索](https://leetcode-cn.com/problems/word-search/)
+
+给定一个二维网格和一个单词，找出该单词是否存在于网格中。
+
+单词必须按照字母顺序，通过相邻的单元格内的字母构成，其中“相邻”单元格是那些水平相邻或垂直相邻的单元格。同一个单元格内的字母不允许被重复使用。
+
+ 
+
+示例:
+
+board =
+[
+  ['A','B','C','E'],
+  ['S','F','C','S'],
+  ['A','D','E','E']
+]
+
+给定 word = "ABCCED", 返回 true
+给定 word = "SEE", 返回 true
+给定 word = "ABCB", 返回 false
+
+> 解题思路：回溯的思路，首先不确定起始值所以两个for循环上。之后回溯
+>
+> 递归截止条件，遍历下一个的条件 返回
+
+```java
+class Solution {
+	    public boolean exist(char[][] board, String word) {
+	    	char[] words = word.toCharArray();
+	    	// 其开头位置不确定
+	    	for(int i=0;i<board.length;i++) {
+	    		for(int j=0;j<board[0].length;j++) {
+	    			if(dfs(board,words,i,j,0)) {
+	    				return true;
+	    			}
+	    		}
+	    	}
+	    	return false;
+	    }
+	    
+	    // 回溯
+	    public boolean dfs(char[][] board,char[] words,int i,int j,int index) {
+	    	// 递归结束条件
+	    	if(i>=board.length || i<0 || j>=board[0].length || j<0 || board[i][j]!=words[index]) {
+	    		return false;
+	    	}
+	    	// 结束的话就是
+	    	if(index==words.length-1) {
+	    		return true;
+	    	}
+	    	// 看下一个
+	    	char temp = board[i][j];
+	    	// 记录当前已经被遍历过了
+	    	board[i][j] = '0';
+	    	boolean res = dfs(board,words,i,j+1,index+1) || dfs(board,words,i,j-1,index+1) 
+	    			    ||dfs(board,words,i+1,j,index+1) || dfs(board,words,i-1,j,index+1);
+	    	// 恢复
+	    	board[i][j] = temp;
+	    	return res;
+	    	
+	    }
+	}
+```
+
+### [10.Leetcode1219黄金矿工](https://leetcode-cn.com/problems/path-with-maximum-gold/)
+
+你要开发一座金矿，地质勘测学家已经探明了这座金矿中的资源分布，并用大小为 m * n 的网格 grid 进行了标注。每个单元格中的整数就表示这一单元格中的黄金数量；如果该单元格是空的，那么就是 0。
+
+为了使收益最大化，矿工需要按以下规则来开采黄金：
+
+每当矿工进入一个单元，就会收集该单元格中的所有黄金。
+矿工每次可以从当前位置向上下左右四个方向走。
+每个单元格只能被开采（进入）一次。
+不得开采（进入）黄金数目为 0 的单元格。
+矿工可以从网格中 任意一个 有黄金的单元格出发或者是停止。
+
+
+示例 1：
+
+输入：grid = [[0,6,0],[5,8,7],[0,9,0]]
+输出：24
+解释：
+[[0,6,0],
+ [5,8,7],
+ [0,9,0]]
+一种收集最多黄金的路线是：9 -> 8 -> 7。
+
+示例 2：
+
+输入：grid = [[1,0,7],[2,0,6],[3,4,5],[0,3,0],[9,0,20]]
+输出：28
+解释：
+[[1,0,7],
+ [2,0,6],
+ [3,4,5],
+ [0,3,0],
+ [9,0,20]]
+一种收集最多黄金的路线是：1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7。
+
+> 解题思路：网格搜索  上下左右 任意位置 
+>
+> 回溯：记录当前值 ，修改当前值 ，遍历别的方向，回溯当前值
+
+```java
+class Solution {
+	    // 回溯网格问题：任意位置出发，上下左右都可以走
+		public int getMaximumGold(int[][] grid) {
+	    	// 结果
+			int res = 0;
+			// 因为从任意一点出发
+			int n = grid.length;
+			int m = grid[0].length;
+			for(int i=0;i<n;i++) {
+				for(int j=0;j<m;j++) {
+					res = Math.max(dfs(grid,i,j),res);
+				}
+			}
+			return res;
+	    }
+		
+		// 回溯
+		public int dfs(int[][] grid,int i,int j) {
+			// 递归结束条件
+			if(i<0||i>=grid.length||j<0||j>=grid[0].length||grid[i][j]==0) {
+				return 0;
+			}
+			// 网格回溯 记录当前值 当前值已访问 恢复当前值
+			int temp = grid[i][j];
+			// 当前值已经被访问了
+			grid[i][j] = 0;
+			// 沿着继续走
+			int up = dfs(grid,i,j-1);
+			int down = dfs(grid,i,j+1);
+			int left = dfs(grid,i-1,j);
+			int right = dfs(grid,i+1,j);
+			int max = Math.max(up, Math.max(right, Math.max(down, left)));
+			// 恢复当前值
+			grid[i][j] = temp;
+			return grid[i][j]+max;
+		}
+	}
+```
+
+### [11.Leetcode051N皇后](https://leetcode-cn.com/problems/n-queens/)
+
+n 皇后问题 研究的是如何将 n 个皇后放置在 n×n 的棋盘上，并且使皇后彼此之间不能相互攻击。
+
+给你一个整数 n ，返回所有不同的 n 皇后问题 的解决方案。
+
+每一种解法包含一个不同的 n 皇后问题 的棋子放置方案，该方案中 'Q' 和 '.' 分别代表了皇后和空位。
+
+ 
+
+示例 1：
+
+输入：n = 4
+输出：[[".Q..","...Q","Q...","..Q."],["..Q.","Q...","...Q",".Q.."]]
+解释：如上图所示，4 皇后问题存在两个不同的解法。
+
+示例 2：
+
+输入：n = 1
+输出：[["Q"]]
+
+> 解题思路：
+>
+> 1.构造一个棋盘，构造返回结果，对行进行一行一行的走
+>
+> 2.那么回溯中遍历列即可就需要判断能否放下去，放下去之后 回溯
+>
+> 3.判断是否能放下去 当前的上方 左上角 右上角
+
+```java
+class Solution {
+	    public List<List<String>> solveNQueens(int n) {
+	    	// 构建一个N*N的棋盘
+	    	char[][] chess = new char[n][n];
+	    	for(int i=0;i<n;i++) {
+	    		for(int j=0;j<n;j++) {
+	    			chess[i][j] = '.';
+	    		}
+	    	}
+	    	// 结果存储
+	    	List<List<String>> res = new ArrayList<>();
+	    	//开始回溯解题 从棋盘第0行开始
+	    	solve(res,chess,0);
+	    	return res;
+	    }
+	    // 回溯解题
+	    public void solve(List<List<String>> res,char[][] chess,int row) {
+	    	// 递归截止条件
+	    	if(row==chess.length) {
+	    		// 将当前棋盘封装成想要的值
+	    		res.add(construct(chess));
+	    		return;
+	    	}
+	    	// 开始遍历列
+	    	for(int col=0;col<chess[0].length;col++) {
+	    		// 判断是否合法 合法才记录
+	    		if(valid(chess,row,col)) {
+	    			chess[row][col] = 'Q';
+	    			solve(res,chess,row+1);
+	    			chess[row][col] = '.';
+	    		}
+	    	}
+	    	
+	    }
+	    // 判断是否合法
+	    public boolean valid(char[][] chess,int row,int col) {
+	    	// 保证其坐标上面位置没有皇后
+	    	for(int i=0;i<row;i++) {
+	    		if(chess[i][col]=='Q') {
+	    			return false;
+	    		}
+	    	}
+	    	// 判断当前坐标的左上角对角线
+	    	for(int i=row-1,j=col+1;i>=0&&j<chess[0].length;i--,j++) {
+	    		if(chess[i][j]=='Q') {
+	    			return false;
+	    		}
+	    	}
+	    	// 判断当前坐标的左上角对角线
+	    	for(int i=row-1,j=col-1;i>=0&&j>=0;i--,j--) {
+	    		if(chess[i][j]=='Q') {
+	    			return false;
+	    		}
+	    	}
+	    	// 都没问题
+	    	return true;
+	    }
+	    
+	    
+	    // 棋盘封装成返回值
+	    public List<String> construct(char[][] chess){
+	    	List<String> path = new ArrayList<>();
+	    	for(int i=0;i<chess.length;i++) {
+	    		// 整行一起添加进来
+	    		path.add(new String(chess[i]));
+	    	}
+	    	return path;
+	    }
+	}
+```
+
+### [12.Leetcode053	N皇后II](https://leetcode-cn.com/problems/n-queens-ii/)
+
+n 皇后问题 研究的是如何将 n 个皇后放置在 n×n 的棋盘上，并且使皇后彼此之间不能相互攻击。
+
+给你一个整数 n ，返回 n 皇后问题 不同的解决方案的数量。
+
+ 
+
+示例 1：
+
+![img](https://assets.leetcode.com/uploads/2020/11/13/queens.jpg)
+
+输入：n = 4
+输出：2
+解释：如上图所示，4 皇后问题存在两个不同的解法。
+示例 2：
+
+输入：n = 1
+输出：1
+
+> 解题思路：同上
+
+```java
+class Solution {
+        int res = 0;
+	    public int totalNQueens(int n) {
+	    	// 构建棋盘
+	    	char[][] chess = new char[n][n];
+	    	for(int i=0;i<n;i++) {
+	    		for(int j=0;j<n;j++) {
+	    			chess[i][j] = '.';
+	    		}
+	    	}
+	    	// 开始回溯 第0行开始
+	    	dfs(chess,0);
+	    	return res;
+	    }
+	    
+	    // 回溯
+	    public void dfs(char[][] chess,int row) {
+	    	// 递归结束条件
+	    	if(row==chess.length) {
+	    		res+=1;
+	    		return;
+	    	}
+	    	// 回溯
+	    	for(int col=0;col<chess[0].length;col++) {
+	    		// 判断能否放下去
+	    		if(valid(chess,row,col)) {
+	    			chess[row][col] = 'Q';
+	    			dfs(chess,row+1);
+	    			chess[row][col] = '.';
+	    		}
+	    	}
+	    }
+	    
+	    // 判断合法性
+	    public boolean valid(char[][] chess,int row,int col) {
+	    	// 判断其上面 其左上角 右上角
+	    	
+	    	for(int i=0;i<row;i++) {
+	    		if(chess[i][col]=='Q') {
+	    			return false;
+	    		}
+	    	}
+	    	
+	    	for(int i=row-1,j=col+1;i>=0&&j<chess[0].length;i--,j++) {
+	    		if(chess[i][j]=='Q') {
+	    			return false;
+	    		}
+	    	}
+	    	
+	    	for(int i=row-1,j=col-1;i>=0&&j>=0;i--,j--) {
+	    		if(chess[i][j]=='Q') {
+	    			return false;
+	    		}
+	    	}
+	    	return true;
+	    }
+	}
+```
 
 
 
@@ -2720,6 +3593,103 @@ class Solution {
 	    		}
 	    	}
 	    	return false;
+    }
+}
+```
+
+### [2.Leetcode045跳跃游戏II](https://leetcode-cn.com/problems/jump-game-ii/)
+
+给定一个非负整数数组，你最初位于数组的第一个位置。
+
+数组中的每个元素代表你在该位置可以跳跃的最大长度。
+
+你的目标是使用最少的跳跃次数到达数组的最后一个位置。
+
+示例:
+
+输入: [2,3,1,1,4]
+输出: 2
+解释: 跳到最后一个位置的最小跳跃数是 2。
+     从下标为 0 跳到下标为 1 的位置，跳 1 步，然后跳 3 步到达数组的最后一个位置。
+说明:
+
+假设你总是可以到达数组的最后一个位置。
+
+> 贪心算法
+
+```java
+class Solution {
+    public int jump(int[] nums) {
+        int rightMax = 0;
+	    	int end  = 0;
+	    	// 结果
+	    	int step = 0;
+	    	// 开始遍历
+	    	for(int i=0;i<nums.length-1;i++) {
+	    		// 增加判断条件而已
+	    		rightMax = Math.max(rightMax, i+nums[i]);
+	    		if(i==end) {
+	    			end = rightMax;
+	    			step++;
+	    		}
+	    	}
+	    	return step;
+    }
+}
+```
+
+
+
+### [3.Leetcode1431拥有最多糖果的孩子](https://leetcode-cn.com/problems/kids-with-the-greatest-number-of-candies/)
+
+给你一个数组 candies 和一个整数 extraCandies ，其中 candies[i] 代表第 i 个孩子拥有的糖果数目。
+
+对每一个孩子，检查是否存在一种方案，将额外的 extraCandies 个糖果分配给孩子们之后，此孩子有 最多 的糖果。注意，允许有多个孩子同时拥有 最多 的糖果数目。
+
+ 
+
+示例 1：
+
+输入：candies = [2,3,5,1,3], extraCandies = 3
+输出：[true,true,true,false,true] 
+解释：
+孩子 1 有 2 个糖果，如果他得到所有额外的糖果（3个），那么他总共有 5 个糖果，他将成为拥有最多糖果的孩子。
+孩子 2 有 3 个糖果，如果他得到至少 2 个额外糖果，那么他将成为拥有最多糖果的孩子。
+孩子 3 有 5 个糖果，他已经是拥有最多糖果的孩子。
+孩子 4 有 1 个糖果，即使他得到所有额外的糖果，他也只有 4 个糖果，无法成为拥有糖果最多的孩子。
+孩子 5 有 3 个糖果，如果他得到至少 2 个额外糖果，那么他将成为拥有最多糖果的孩子。
+
+示例 2：
+
+输入：candies = [4,2,1,1,2], extraCandies = 1
+输出：[true,false,false,false,false] 
+解释：只有 1 个额外糖果，所以不管额外糖果给谁，只有孩子 1 可以成为拥有糖果最多的孩子。
+
+示例 3：
+
+输入：candies = [12,1,12], extraCandies = 10
+输出：[true,false,true]
+
+> 解题思路：找到其最大值，之后每个值加上额外的值看与最大值比较
+
+```java
+class Solution {
+    public List<Boolean> kidsWithCandies(int[] candies, int extraCandies) {
+        List<Boolean> res = new ArrayList<>();
+	    	// 先遍历找到其最大值
+	    	int max = candies[0];
+	    	for(int i=1;i<candies.length;i++) {
+	    		max = Math.max(max, candies[i]);
+	    	}
+	    	// 之后统计结果 贪心算法
+	    	for(int i=0;i<candies.length;i++) {
+	    		if(candies[i]+extraCandies>=max) {
+	    			res.add(true);
+	    		}else {
+	    			res.add(false);
+	    		}
+	    	}	    	
+	    	return res;
     }
 }
 ```
@@ -2984,6 +3954,42 @@ class Solution {
 	    	return -1;
 	    }
 	}
+```
+
+### [5.Leetcode剑指Offer53 -II 0~N-1中缺失的数字](https://leetcode-cn.com/problems/que-shi-de-shu-zi-lcof/)
+
+一个长度为n-1的递增排序数组中的所有数字都是唯一的，并且每个数字都在范围0～n-1之内。在范围0～n-1内的n个数字中有且只有一个数字不在该数组中，请找出这个数字。
+
+ 
+
+示例 1:
+
+输入: [0,1,3]
+输出: 2
+
+示例 2:
+
+输入: [0,1,2,3,4,5,6,7,9]
+输出: 8
+
+> 解题思路：看到有序数组则考虑二分查找
+
+```java
+class Solution {
+    public int missingNumber(int[] nums) {
+        int left = 0;
+	    	int right = nums.length-1;
+	    	while(left<=right) {
+	    		int mid = left + ((right-left)>>1);
+	    		if(nums[mid]==mid) {
+	    			left = mid+1;
+	    		}else {
+	    			right = mid-1;
+	    		}
+	    	}
+	    	return left;
+    }
+}
 ```
 
 
