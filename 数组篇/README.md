@@ -302,6 +302,105 @@ class Solution {
 	}
 ```
 
+### [6.Leetcode_Interview 01.02判定是否互为字符重排](https://leetcode-cn.com/problems/check-permutation-lcci/)
+
+给定两个字符串 s1 和 s2，请编写一个程序，确定其中一个字符串的字符重新排列后，能否变成另一个字符串。
+
+示例 1：
+
+输入: s1 = "abc", s2 = "bca"
+输出: true 
+示例 2：
+
+输入: s1 = "abc", s2 = "bad"
+输出: false
+说明：
+
+0 <= len(s1) <= 100
+0 <= len(s2) <= 100
+
+> 解题思路：用HashMap辅助 记录单词和数量
+
+```java
+class Solution {
+    public boolean CheckPermutation(String s1, String s2) {
+    // 转成数组
+	    	char[] arr_1 = s1.toCharArray();
+	    	char[] arr_2 = s2.toCharArray();
+	    	// 判断长度
+	    	if(arr_1.length!=arr_2.length) {
+	    		return false;
+	    	}
+	    	// 两个HashMap即可
+	    	HashMap<Character,Integer> hashMap1 = new HashMap<>();
+	    	HashMap<Character,Integer> hashMap2 = new HashMap<>();
+	    	for(int i=0;i<arr_1.length;i++) {
+	    		hashMap1.put(arr_1[i],hashMap1.getOrDefault(arr_1[i],0)+1);
+	    		hashMap2.put(arr_2[i],hashMap2.getOrDefault(arr_2[i], 0)+1);
+	    	}
+	    	// 遍历
+	    	for(int i=0;i<arr_1.length;i++) {
+	    		if(!hashMap2.containsKey(arr_1[i])||hashMap2.get(arr_1[i])!=hashMap1.get(arr_1[i])) {
+	    			return false;
+	    		}
+	    	}
+	    	return true;
+    }
+}
+```
+
+### [7.Leetcode128最长连续序列](https://leetcode-cn.com/problems/longest-consecutive-sequence/)
+
+给定一个未排序的整数数组 nums ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。
+
+ 
+
+进阶：你可以设计并实现时间复杂度为 O(n) 的解决方案吗？
+
+ 
+
+示例 1：
+
+输入：nums = [100,4,200,1,3,2]
+输出：4
+解释：最长数字连续序列是 [1, 2, 3, 4]。它的长度为 4。
+
+示例 2：
+
+输入：nums = [0,3,7,2,5,8,4,6,0,1]
+输出：9
+
+> 解题思路：用Hashset辅助。来查找记录值即可了。
+
+```java
+class Solution {
+    public int longestConsecutive(int[] nums) {
+// 就是连续的
+	    	HashSet<Integer> hashset = new HashSet<Integer>();
+	    	for(int num:nums) {
+	    		hashset.add(num);
+	    	}
+	    	// 结果
+	    	int res = 0;
+	    	//对hashset遍历
+	    	for(int num:hashset) {
+	    		// 如果其不存在前缀
+	    		if(!hashset.contains(num-1)) {
+	    			// 直接找其后缀
+	    			int curNum = num;
+	    			int curLength = 1;
+	    			while(hashset.contains(curNum+1)) {
+	    				curNum += 1;
+	    				curLength += 1;
+	    			}
+	    			res = Math.max(res, curLength);
+	    		}
+	    	}
+	    	return res;
+    }
+}
+```
+
 
 
 ## HashMap辅助+二叉树解题
@@ -1037,116 +1136,6 @@ class Solution {
 }
 ```
 
-## 排序辅助解题
-
-### [1.Leetcode1375有多少小于当前数字的数字](https://leetcode-cn.com/problems/how-many-numbers-are-smaller-than-the-current-number/)
-
-给你一个数组 nums，对于其中每个元素 nums[i]，请你统计数组中比它小的所有数字的数目。
-
-换而言之，对于每个 nums[i] 你必须计算出有效的 j 的数量，其中 j 满足 j != i 且 nums[j] < nums[i] 。
-
-以数组形式返回答案。
-
-
-
-示例 1：
-
-输入：nums = [8,1,2,2,3]
-输出：[4,0,1,1,3]
-解释： 
-对于 nums[0]=8 存在四个比它小的数字：（1，2，2 和 3）。 
-对于 nums[1]=1 不存在比它小的数字。
-对于 nums[2]=2 存在一个比它小的数字：（1）。 
-对于 nums[3]=2 存在一个比它小的数字：（1）。 
-对于 nums[4]=3 存在三个比它小的数字：（1，2 和 2）。
-
-示例 2：
-
-输入：nums = [6,5,4,8]
-输出：[2,1,0,3]
-
-示例 3：
-
-输入：nums = [7,7,7,7]
-输出：[0,0,0,0]
-
-> 解题思路一、暴力破解法
-
-```java
-class Solution {
-    public int[] smallerNumbersThanCurrent(int[] nums) {
-        // 对每个数都对其统计
-	    	int[] res = new int[nums.length];
-	    	for(int i=0;i<nums.length;i++) {
-	    		int count = 0;
-	    		for(int j=0;j<nums.length;j++) {
-	    			if(nums[i]>nums[j]) {
-	    				count++;
-	    			}
-	    		}
-	    		res[i] = count;
-	    	}
-	    	return res;
-    }
-}
-```
-
-> 解题思路二、排序+一个辅助的空间结构
-
-```java
-// 排序来解题 但需一个辅助结构来记录之前的索引
-	    public int[] smallerNumbersThanCurrent_2(int[] nums) {
-	    	// 第一维度记录原来数据 第二维度记录之前的索引
-	    	int[][] new_nums = new int[nums.length][nums.length];
-	    	for(int i=0;i<nums.length;i++) {
-	    		new_nums[i][0] = nums[i];
-	    		new_nums[i][1] = i;
-	    	}
-	    	// 对其按照第一维度排序
-	    	Arrays.sort(new_nums,(a,b)->(a[0]-b[0]));
-	    	
-	    	//结果存储
-    		int prev = -1;
-    		int[] res = new int[nums.length];
-	    	// 接下来统计可
-	    	for(int i=0;i<new_nums.length;i++) {
-	    		// 第一个数或者两个数同
-	    		if(prev==-1 || new_nums[i][0]!=new_nums[i-1][0]) {
-	    			prev = i;
-	    		}
-	    		res[new_nums[i][1]] = prev;
-	    	}
-	    	return res;
-	    }
-```
-
-> 解题思路三、最优 计数排序
-
-```java
-// 计数排序 桶排序
-	    public int[] smallerNumbersThanCurrent_3(int[] nums) {
-	    	// 观察数据范围为0-100之间
-	    	int[] bucket = new int[101];
-	    	// 统计每个数出现的频率
-	    	for(int num:nums) {
-	    		bucket[num]++;
-	    	}
-	    	// 之后对其相加
-	    	for(int i=1;i<101;i++) {
-	    		bucket[i] = bucket[i] + bucket[i-1];
-	    	}
-	    	// 结果
-	    	int[] res = new int[nums.length];
-	    	for(int i=0;i<nums.length;i++) {
-	    		// 这里需考虑0
-	    		res[i] = nums[i]==0?0:bucket[nums[i]-1];
-	    	}
-	    	return res;
-	    }
-```
-
-
-
 
 
 ## 双指针(快慢指针)解题
@@ -1739,7 +1728,504 @@ class Solution {
 	    }
 ```
 
+### [11.Leetcode287寻找重复数](https://leetcode-cn.com/problems/find-the-duplicate-number/)
 
+给定一个包含 n + 1 个整数的数组 nums ，其数字都在 1 到 n 之间（包括 1 和 n），可知至少存在一个重复的整数。
+
+假设 nums 只有 一个重复的整数 ，找出 这个重复的数 。
+
+ 
+
+示例 1：
+
+输入：nums = [1,3,4,2,2]
+输出：2
+
+示例 2：
+
+输入：nums = [3,1,3,4,2]
+输出：3
+
+示例 3：
+
+输入：nums = [1,1]
+输出：1
+
+示例 4：
+
+输入：nums = [1,1,2]
+输出：1
+
+> 解题思路1：用排序来帮忙
+
+```java
+// 第一种解题思路：排序
+	    public int findDuplicate(int[] nums) {
+	       Arrays.sort(nums);
+	       for(int i=0;i<nums.length-1;i++) {
+	    	   if(nums[i]==nums[i+1]) {
+	    		   return nums[i];
+	    	   }
+	       }
+	       return 0;
+	    }
+```
+
+> 解题思路2：将数组看成一个循环的链表 从而用双指针来解题的思路
+
+```java
+class Solution {
+    public int findDuplicate(int[] nums) {
+       // 必定存在重复值， 必定相遇
+	    	int low = 0;
+	    	int fast = 0;
+	    	while(true) {
+	    		// 走两步
+	    		low = nums[low];
+	    		fast = nums[nums[fast]];
+	    		// 相遇； 
+	    		if(low==fast) {
+	    			// 开始找起点 走一步
+	    			fast = 0;
+	    			while(nums[fast]!=nums[low]) {
+	    				fast = nums[fast];
+	    				low = nums[low];
+	    			}
+	    			return nums[low];
+	    		}
+	    	}
+    }
+}
+```
+
+### [12.Leetcode209长度最小的子数组](https://leetcode-cn.com/problems/minimum-size-subarray-sum/)
+
+给定一个含有 n 个正整数的数组和一个正整数 s ，找出该数组中满足其和 ≥ s 的长度最小的 连续 子数组，并返回其长度。如果不存在符合条件的子数组，返回 0。
+
+ 
+
+示例：
+
+输入：s = 7, nums = [2,3,1,2,4,3]
+输出：2
+解释：子数组 [4,3] 是该条件下的长度最小的子数组。
+
+
+进阶：
+
+如果你已经完成了 O(n) 时间复杂度的解法, 请尝试 O(n log n) 时间复杂度的解法。
+
+> 时间复杂为O(n)，且连续的最小的，
+>
+> 考虑双指针，同时出发，之后慢慢缩短距离
+
+```java
+class Solution {
+    public int minSubArrayLen(int s, int[] nums) {
+           // 时间复杂度为O(n)思考 双指针
+	    	int left = 0;
+	    	int right = 0;
+	    	int sum = 0;
+	    	int minLength = Integer.MAX_VALUE;
+	    	while(right<nums.length) {
+	    		sum += nums[right];
+	    		while(sum>=s) {
+	    			//记录此时长度
+	    			int length = right-left+1;
+	    			// 开始缩短左边
+	    			sum -= nums[left];
+	    			left++;
+	    			minLength = Math.min(minLength, length);
+	    		}
+	    		
+	    		right++;	    		
+	    	}
+	    	return minLength!=Integer.MAX_VALUE?minLength:0;
+    }
+}
+```
+
+### [13.Leetcode977有序数组的平方](https://leetcode-cn.com/problems/squares-of-a-sorted-array/)
+
+给你一个按 非递减顺序 排序的整数数组 nums，返回 每个数字的平方 组成的新数组，要求也按 非递减顺序 排序。
+
+ 
+
+示例 1：
+
+输入：nums = [-4,-1,0,3,10]
+输出：[0,1,9,16,100]
+解释：平方后，数组变为 [16,1,0,9,100]
+排序后，数组变为 [0,1,9,16,100]
+
+示例 2：
+
+输入：nums = [-7,-3,2,3,11]
+输出：[4,9,9,49,121]
+
+> 双指针 用双指针的思考 从哪里开始，如何移动
+
+```java
+class Solution {
+    public int[] sortedSquares(int[] nums) {
+// 双指针解题 不从中间开始 从两边开始
+	    	int left = 0;
+	    	int right = nums.length-1;
+	    	// 结果
+	    	int[] res = new int[nums.length];
+	    	int index = nums.length-1;
+	    	while(left<=right) {
+	    		// 开始
+	    		if(nums[left]*nums[left]>=nums[right]*nums[right]) {
+	    			res[index--] = nums[left]*nums[left]; 
+	    			left++;
+	    		}else {
+	    			res[index--] = nums[right]*nums[right];
+	    			right--;
+	    		}
+	    	}
+	    	return res;
+    }
+}
+```
+
+### [14.Leetcode080删除排序数组中的重复项II](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array-ii/)
+
+给定一个增序排列数组 nums ，你需要在 原地 删除重复出现的元素，使得每个元素最多出现两次，返回移除后数组的新长度。
+
+不要使用额外的数组空间，你必须在 原地 修改输入数组 并在使用 O(1) 额外空间的条件下完成。
+
+
+
+示例 1：
+
+输入：nums = [1,1,1,2,2,3]
+输出：5, nums = [1,1,2,2,3]
+解释：函数应返回新长度 length = 5, 并且原数组的前五个元素被修改为 1, 1, 2, 2, 3 。 你不需要考虑数组中超出新长度后面的元素。
+
+示例 2：
+
+输入：nums = [0,0,1,1,1,1,2,3,3]
+输出：7, nums = [0,0,1,1,2,3,3]
+解释：函数应返回新长度 length = 7, 并且原数组的前五个元素被修改为 0, 0, 1, 1, 2, 3, 3 。 你不需要考虑数组中超出新长度后面的元素。
+
+> 解题思路：考察逻辑，考察一个遍历原数组，一个遍历新数组。
+
+```java
+class Solution {
+    public int removeDuplicates(int[] nums) {
+            int low = 0;
+	    	int fast = 1;
+	    	int fre = 0;
+	    	while(fast<nums.length) {
+	    		// 老数组
+	    		if(nums[fast]==nums[low]) {
+	    			fre++;
+	    		}else {
+	    			fre = 0;
+	    		}
+	    		
+	    		// 新数组
+	    		if(fre<2) {
+	    			low++;
+	    			nums[low] = nums[fast];
+	    		}
+	    		
+	    		// 接着走
+	    		fast++;
+	    	}
+	    	return low+1;
+    }
+}
+```
+
+
+
+## 单调栈
+
+### [1.Leetcode084柱状图中最大的矩形](https://leetcode-cn.com/problems/largest-rectangle-in-histogram/)(计算最值)
+
+给定 n 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。
+
+求在该柱状图中，能够勾勒出来的矩形的最大面积。
+
+ ![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/10/12/histogram.png)
+
+
+
+以上是柱状图的示例，其中每个柱子的宽度为 1，给定的高度为 [2,1,5,6,2,3]。
+
+ ![img](https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/10/12/histogram_area.png)
+
+
+
+图中阴影部分为所能勾勒出的最大矩形面积，其面积为 10 个单位。
+
+示例:
+
+输入: [2,1,5,6,2,3]
+输出: 10
+
+> 解题思路一、从当前出发，左边while连续找一个比它大的，右边找一个比它大的。
+
+```java
+// 暴力解法
+	    public int largestRectangleArea(int[] heights) {
+	    	// 存储结果
+	    	int res = 0;
+	    	// 对其整个进行遍历
+	    	for(int i=0;i<heights.length;i++) {
+	    		// 计算当前每个值的最大面积
+	    		int curHeight = heights[i];
+	    		// 左右指针
+	    		int left = i-1;
+	    		//开始
+	    		while(left>=0&&heights[left]>=curHeight) {
+	    			left--;
+	    		}
+	    		// 找不到
+	    		left++;	    		
+	    		int right = i+1;
+	    		while(right<heights.length&&heights[right]>=curHeight) {
+	    			right++;
+	    		}
+	    		// 找不到
+	    		right--;
+	    		
+	    		// 计算面积
+	    		int maxarea = (right-left+1)*(curHeight);
+	    		res = Math.max(res, maxarea);
+	    	}
+	    	return res;
+	    }
+```
+
+> 解题思路二、一个单调的辅助栈来模拟
+
+```java
+// 单调栈
+	    public int largestRectangleArea_2(int[] heights) {
+	    	int res = 0;
+	    	// 单调栈辅助解题
+	    	Deque<Integer> stack = new ArrayDeque<>();
+	    	// 在其头尾补充
+	    	int[] new_heights = new int[heights.length+2];
+	    	//复制
+	    	System.arraycopy(heights, 0, new_heights, 1,heights.length);
+	    	// 开始遍历
+	    	for(int i=0;i<new_heights.length;i++) {
+	    		// 单调栈
+	    		while(!stack.isEmpty()&&new_heights[stack.peek()]>new_heights[i]) {
+	    			int curIndex = stack.pop();
+	    			res = Math.max(res, (i-stack.peek()-1)*new_heights[curIndex]);
+	    		}
+	    		stack.push(i);
+	    	}
+	    	return res;
+	    }
+```
+
+### [2.Leetcode739每日温度](https://leetcode-cn.com/problems/daily-temperatures/)
+
+请根据每日 气温 列表，重新生成一个列表。对应位置的输出为：要想观测到更高的气温，至少需要等待的天数。如果气温在这之后都不会升高，请在该位置用 0 来代替。
+
+例如，给定一个列表 temperatures = [73, 74, 75, 71, 69, 72, 76, 73]，你的输出应该是 [1, 1, 4, 2, 1, 1, 0, 0]。
+
+提示：气温 列表长度的范围是 [1, 30000]。每个气温的值的均为华氏度，都是在 [30, 100] 范围内的整数。
+
+> 解题思路：当题目有意当前比它大的，考虑单调栈的思路解题。
+
+```java
+class Solution {
+    public int[] dailyTemperatures(int[] T) {
+         // 看后面几天 是否有高的 单调栈 递减栈
+	    	Deque<Integer> stack = new ArrayDeque<Integer>();
+	    	// 拷贝
+	    	// 对其遍历
+	    	// 结果 单调递减栈
+	    	int[] res = new int[T.length];
+	    	for(int i=0;i<T.length;i++) {
+	    		// 出栈
+	    		while(!stack.isEmpty()&&T[stack.peek()]<T[i]) {
+	    			// 满足条件
+	    			int index = stack.pop();
+	    			res[index] = i-index; 
+	    		}
+	    		// 入栈
+	    		stack.push(i);
+	    	}
+	    	return res;
+    }
+}
+```
+
+### [3.Leetcode469下一个更大元素I](https://leetcode-cn.com/problems/next-greater-element-i/)
+
+给你两个 没有重复元素 的数组 nums1 和 nums2 ，其中nums1 是 nums2 的子集。
+
+请你找出 nums1 中每个元素在 nums2 中的下一个比其大的值。
+
+nums1 中数字 x 的下一个更大元素是指 x 在 nums2 中对应位置的右边的第一个比 x 大的元素。如果不存在，对应位置输出 -1 。
+
+ 
+
+示例 1:
+
+输入: nums1 = [4,1,2], nums2 = [1,3,4,2].
+输出: [-1,3,-1]
+解释:
+    对于 num1 中的数字 4 ，你无法在第二个数组中找到下一个更大的数字，因此输出 -1 。
+    对于 num1 中的数字 1 ，第二个数组中数字1右边的下一个较大数字是 3 。
+    对于 num1 中的数字 2 ，第二个数组中没有下一个更大的数字，因此输出 -1 。
+
+示例 2:
+
+输入: nums1 = [2,4], nums2 = [1,2,3,4].
+输出: [3,-1]
+解释:
+    对于 num1 中的数字 2 ，第二个数组中的下一个较大数字是 3 。
+    对于 num1 中的数字 4 ，第二个数组中没有下一个更大的数字，因此输出 -1 。
+
+> 解题思路：单调栈+HashMap辅助结构来解题。
+
+```java
+class Solution {
+    public int[] nextGreaterElement(int[] nums1, int[] nums2) {
+        // 单调栈
+	    	// 现在nums2中遍历 得到每一个比起大的元素
+	    	// 结果用HashMap来存储
+	    	HashMap<Integer,Integer> hashMap = new HashMap<Integer,Integer>();
+	    	Deque<Integer> stack = new ArrayDeque<>();
+	    	// 对nums2遍历 单调栈的方法
+	    	for(int i=0;i<nums2.length;i++) {
+	    		// 出栈
+	    		while(!stack.isEmpty()&&nums2[i]>nums2[stack.peek()]) {
+	    			int curIndex = stack.pop();
+	    			// 存储
+	    			hashMap.put(nums2[curIndex],nums2[i]);
+	    		}
+	    		// 入栈
+	    		stack.push(i);
+	    	}
+	    	// 单调栈中其实还有一些值
+	    	while(!stack.isEmpty()) {
+	    		hashMap.put(nums2[stack.pop()],-1);
+	    	}
+	    	// 结果存储
+	    	int[] res = new int[nums1.length];
+	    	// 开始遍历num1找其值
+	    	for(int i=0;i<nums1.length;i++) {
+	    		if(hashMap.containsKey(nums1[i])) {
+	    			//包含该值则
+	    			res[i] = hashMap.get(nums1[i]);
+	    		}
+	    	}
+	    	return res;
+    }
+}
+```
+
+### [4.Leetcode042接雨水](https://leetcode-cn.com/problems/trapping-rain-water/)
+
+给定 n 个非负整数表示每个宽度为 1 的柱子的高度图，计算按此排列的柱子，下雨之后能接多少雨水。
+
+ 
+
+示例 1：
+
+
+
+输入：height = [0,1,0,2,1,0,1,3,2,1,2,1]
+输出：6
+解释：上面是由数组 [0,1,0,2,1,0,1,3,2,1,2,1] 表示的高度图，在这种情况下，可以接 6 个单位的雨水（蓝色部分表示雨水）。 
+示例 2：
+
+输入：height = [4,2,0,3,2,5]
+输出：9
+
+> 解题思路：暴力解法
+
+```java
+// 第一种思路 找其左边最大值 找其右边最大值
+		public int trap(int[] height) {
+			// 当前左右两边最大值中的最小值 首位两边装不下
+			int res = 0;
+			
+			for(int i=1;i<height.length-1;i++) {
+				int leftHeight = 0;
+				int rightHeight = 0;
+				// 不用管是否连续
+				for(int j=i;j>=0;j--) {
+					leftHeight = Math.max(leftHeight, height[j]);
+				}
+				for(int k=i;k<=height.length-1;k++) {
+					rightHeight = Math.max(rightHeight, height[k]);
+				}
+				// 找其最值
+				res += Math.min(leftHeight, rightHeight) - height[i];
+			}
+			return res;
+	    }
+```
+
+> 解题思路二、维护一个动态数组
+
+```java
+// 第二种思路 维护数组
+		public int trap_2(int[] height) {
+			if(height.length==0){
+                return 0;
+            }
+			int res = 0;
+			int[] leftMax = new int[height.length];
+			int[] rightMax = new int[height.length];
+			// 对其遍历赋值
+			leftMax[0] = height[0];
+			for(int i=1;i<height.length;i++) {
+				leftMax[i] = Math.max(leftMax[i-1], height[i]);
+			}
+			
+			rightMax[height.length-1] = height[height.length-1];
+			for(int i=height.length-2;i>=0;i--) {
+				rightMax[i] = Math.max(rightMax[i+1], height[i]);
+			}
+			// 计算
+			for(int i=1;i<=height.length-2;i++) {
+				res += Math.min(leftMax[i], rightMax[i])-height[i];
+			}
+			return res;
+		}
+		
+```
+
+> 单调栈的思路
+
+```java
+// 第三种思路 单调栈 需要知道后面是否有比它大的
+		public int trap_3(int[] height) {
+			if(height==null) {
+				return 0;
+			}
+			Deque<Integer> stack = new ArrayDeque<>();
+			int res = 0;
+			// 对其遍历
+			for(int i=0;i<height.length;i++) {
+				while(!stack.isEmpty()&&height[i]>height[stack.peek()]) {
+					int curIndex = stack.pop();
+					while(!stack.isEmpty()&&height[stack.peek()]==height[curIndex]) {
+						stack.pop();
+					}
+					if(!stack.isEmpty()) {
+						int stackTop = stack.peek();
+						res += (Math.min(height[stackTop], height[i])-height[curIndex])*(i-curIndex-1);
+					}
+					
+				}
+				stack.push(i);
+			}
+			return res;
+		}
+```
 
 
 
@@ -2160,6 +2646,199 @@ class Solution {
 	        	end_col--;
 	        }
 	        return res;
+    }
+}
+```
+
+### [5.Leetcode119 杨辉三角II](https://leetcode-cn.com/problems/pascals-triangle-ii/)
+
+给定一个非负索引 k，其中 k ≤ 33，返回杨辉三角的第 k 行。
+
+![img](https://upload.wikimedia.org/wikipedia/commons/0/0d/PascalTriangleAnimated2.gif)
+
+在杨辉三角中，每个数是它左上方和右上方的数的和。
+
+示例:
+
+输入: 3
+输出: [1,3,3,1]
+
+```java
+package com.lcz.leetcode;
+import java.util.*;
+public class Leetcode119 {
+	class Solution {
+	    public List<Integer> getRow(int rowIndex) {
+	    	// 全部的
+	    	List<List<Integer>> res_all = new ArrayList<>();
+	    	for(int i=0;i<=rowIndex;i++) {
+	    		// 每一行的List
+	    		List<Integer> res = new ArrayList<>();
+	    		//每一行的值
+	    		for(int j=0;j<=i;j++) {
+	    			// 头是1 尾巴是1
+	    			if(j==0 || j==i) {
+	    				res.add(1);
+	    			}else {
+	    				//值(i,j)= (i-1,j)+(i-1,j-1)
+	    				int lastValue_1 = res_all.get(i-1).get(j);
+	    				int ladtValue_2 = res_all.get(i-1).get(j-1);
+	    				res.add(lastValue_1+ladtValue_2);
+	    			}
+	    		}
+	    		// 添加
+	    		res_all.add(res);
+	    	}
+	    	// 返回
+	    	return res_all.get(rowIndex);
+	    }
+	}
+}
+
+```
+
+> 优化思路：
+
+```java
+class Solution {
+    public List<Integer> getRow(int rowIndex) {
+        List<Integer> list = new ArrayList<>();
+        list.add(1);
+        for (int i = 0; i < rowIndex; i++) {
+            for (int j = i; j >= 1; j--) {
+                list.set(j, list.get(j - 1) + list.get(j));
+            }
+            list.add(1);
+        }
+        return list;
+    }
+}
+
+
+```
+
+### [6.Leetcode074搜索二维矩阵](https://leetcode-cn.com/problems/search-a-2d-matrix/)
+
+编写一个高效的算法来判断 m x n 矩阵中，是否存在一个目标值。该矩阵具有如下特性：
+
+每行中的整数从左到右按升序排列。
+每行的第一个整数大于前一行的最后一个整数。
+
+示例 1：
+
+![img](https://assets.leetcode.com/uploads/2020/10/05/mat.jpg)
+
+输入：matrix = [[1,3,5,7],[10,11,16,20],[23,30,34,60]], target = 3
+输出：true
+
+> 解题思路：从右上角开始搜索即可
+
+```java
+class Solution {
+    public boolean searchMatrix(int[][] matrix, int target) {
+            int m = matrix.length;
+	    	int n = matrix[0].length;
+	    	int start_x = 0;
+	    	int start_y = n-1;
+	    	// 开始搜索
+	    	while(start_x<m&&start_y>=0) {
+	    		if(matrix[start_x][start_y]==target) {
+	    			return true;
+	    		}else if(matrix[start_x][start_y]>target) {
+	    			start_y--;
+	    		}else if(matrix[start_x][start_y]<target) {
+	    			start_x++;
+	    		}
+	    	}
+	    	return false;
+    }
+}
+```
+
+### [7.Leetcode628三个数的最大乘积](https://leetcode-cn.com/problems/maximum-product-of-three-numbers/)
+
+给你一个整型数组 nums ，在数组中找出由三个数组成的最大乘积，并输出这个乘积。
+
+ 
+
+示例 1：
+
+输入：nums = [1,2,3]
+输出：6
+
+示例 2：
+
+输入：nums = [1,2,3,4]
+输出：24
+示例 3：
+
+输入：nums = [-1,-2,-3]
+输出：-6
+
+> 解题思路：三个数全是正数，则就是最后三个最大的；
+>
+> 若有负数，那么要不就是两个最小的*一个最大的或者最后三个最大的。
+
+```java
+class Solution {
+		// 解题思路：排序 + 思考 如果数组全是正数那么 就是最后三个乘积 如果数组有负数，那么要不就是三个乘积 要不就是两个最小的负数*一个正数
+	    public int maximumProduct(int[] nums) {
+	    	Arrays.sort(nums);
+	    	int len = nums.length;
+	    	int res = Math.max(nums[len-1]*nums[len-2]*nums[len-3], nums[0]*nums[1]*nums[len-1]);
+	    	return res;
+	    }
+	}
+```
+
+### [8.Leetcode922按奇偶排序数组II](https://leetcode-cn.com/problems/sort-array-by-parity-ii/)
+
+给定一个非负整数数组 A， A 中一半整数是奇数，一半整数是偶数。
+
+对数组进行排序，以便当 A[i] 为奇数时，i 也是奇数；当 A[i] 为偶数时， i 也是偶数。
+
+你可以返回任何满足上述条件的数组作为答案。
+
+ 
+
+示例：
+
+输入：[4,2,5,7]
+输出：[4,5,2,7]
+解释：[4,7,2,5]，[2,5,4,7]，[2,7,4,5] 也会被接受。
+
+
+提示：
+
+2 <= A.length <= 20000
+A.length % 2 == 0
+0 <= A[i] <= 1000
+
+> 解题思路：在原数组上进行修改，两个指针，一个奇数 一个偶数
+
+```java
+class Solution {
+    public int[] sortArrayByParityII(int[] A) {
+        int left = 0;
+	    	int right = 1;
+	    	while(left<A.length-1&&right<A.length) {
+	    		// 满足条件移动到一个
+	    		// 满足偶数
+	    		while(left<A.length-1&&A[left]%2==0) {
+	    			left += 2;
+	    		}
+	    		// 满足奇数
+	    		while(right<A.length&&A[right]%2==1) {
+	    			right += 2;
+	    		}
+	    		// 存在不满足的
+	    		if(left<A.length-1&&right<A.length) {
+	    			int temp = A[left];
+	    			A[left]  = A[right];
+	    			A[right] = temp;
+	    		}
+	    	}
+	    	return A;
     }
 }
 ```
@@ -2692,9 +3371,53 @@ class Solution {
 }
 ```
 
+### [7.Leetcode152乘积最大子数组](https://leetcode-cn.com/problems/maximum-product-subarray/)
+
+给你一个整数数组 nums ，请你找出数组中乘积最大的连续子数组（该子数组中至少包含一个数字），并返回该子数组所对应的乘积。
+
+ 
+
+示例 1:
+
+输入: [2,3,-2,4]
+输出: 6
+解释: 子数组 [2,3] 有最大乘积 6。
+
+示例 2:
+
+输入: [-2,0,-1]
+输出: 0
+解释: 结果不能为 2, 因为 [-2,-1] 不是子数组。
+
+> 解题思路：存在负数，那么就维护两个值，一个是最大，一个是最小，负数时候交换两数。要不就来判断乘积之后的值大小
+
+```java
+class Solution {
+    public int maxProduct(int[] nums) {
+        // 维护一个最大的子数组，维护一个最小的子数组
+	    	int res = Integer.MIN_VALUE;
+	    	int imax = 1;
+	    	int imin = 1;
+	    	for(int i=0;i<nums.length;i++) {
+	    		// 负数的时候交换
+	    		if(nums[i]<0) {
+	    			int temp = imax;
+	    			imax = imin;
+	    			imin = temp;
+	    		}
+	    		// 要不就从头开始要不就
+	    		imax = Math.max(imax*nums[i], nums[i]);
+	    		imin = Math.min(imin*nums[i], nums[i]);
+	    		res = Math.max(imax,res);
+	    	}
+	    	return res;
+    }
+}
+```
 
 
-## 溯解题
+
+## 回溯解题
 
 ```java
 def backward():
@@ -3514,6 +4237,76 @@ class Solution {
 	}
 ```
 
+## 深度优先搜索(与回溯类似但不回去)
+
+### [1.Leetcode695岛屿的最大面积](https://leetcode-cn.com/problems/max-area-of-island/)
+
+给定一个包含了一些 0 和 1 的非空二维数组 grid 。
+
+一个 岛屿 是由一些相邻的 1 (代表土地) 构成的组合，这里的「相邻」要求两个 1 必须在水平或者竖直方向上相邻。你可以假设 grid 的四个边缘都被 0（代表水）包围着。
+
+找到给定的二维数组中最大的岛屿面积。(如果没有岛屿，则返回面积为 0 。)
+
+ 
+
+示例 1:
+
+[[0,0,1,0,0,0,0,1,0,0,0,0,0],
+ [0,0,0,0,0,0,0,1,1,1,0,0,0],
+ [0,1,1,0,1,0,0,0,0,0,0,0,0],
+ [0,1,0,0,1,1,0,0,1,0,1,0,0],
+ [0,1,0,0,1,1,0,0,1,1,1,0,0],
+ [0,0,0,0,0,0,0,0,0,0,1,0,0],
+ [0,0,0,0,0,0,0,1,1,1,0,0,0],
+ [0,0,0,0,0,0,0,1,1,0,0,0,0]]
+对于上面这个给定矩阵应返回 6。注意答案不应该是 11 ，因为岛屿只能包含水平或垂直的四个方向的 1 。
+
+示例 2:
+
+[[0,0,0,0,0,0,0,0]]
+对于上面这个给定的矩阵, 返回 0。
+
+> 解题思路：沉岛的解题思路，遇到1将其周围都置为0，将其添加求和即可。或者类似于朋友圈问题
+
+```java
+class Solution {
+		// 解题思路：DFS与回溯略微有所不同，回溯是路径下去 然后再回来 DFS是周围全部 的
+		// 解题用沉岛思想，也可以用类似朋友圈思想
+	    public int maxAreaOfIsland(int[][] grid) {
+	    	// 结果
+	    	int res  = 0;
+	    	// 出发点任意
+	    	for(int i=0;i<grid.length;i++) {
+	    		for(int j=0;j<grid[0].length;j++) {
+	    			if(grid[i][j]==1) {
+		    			res = Math.max(res, dfs(grid,i,j));
+	    			}
+	    		}
+	    	}
+	    	return res;
+	    }
+	    // 深度优先搜索
+	    public int dfs(int[][] grid,int i,int j) {
+	    	// 递归截止条件
+	    	if(i<0||i>=grid.length||j<0||j>=grid[0].length||grid[i][j]==0) {
+	    		return 0;
+	    	}
+	    	// 统计结果 当前结果
+	    	int num = 1;
+	    	// 已访问置为0
+	    	grid[i][j] = 0;
+	    	// 别的点
+	    	num += dfs(grid,i+1,j);
+	    	num += dfs(grid,i-1,j);
+	    	num += dfs(grid,i,j+1);
+	    	num += dfs(grid,i,j-1);
+	    	return num;	    	
+	    }
+	}
+```
+
+
+
 
 
 ## 贪心辅助解题
@@ -3895,6 +4688,79 @@ class Solution {
 	}
 ```
 
+### [3.剑指Offer53在排序数组中查找数组I](https://leetcode-cn.com/problems/zai-pai-xu-shu-zu-zhong-cha-zhao-shu-zi-lcof/)
+
+统计一个数字在排序数组中出现的次数。
+
+ 
+
+示例 1:
+
+输入: nums = [5,7,7,8,8,10], target = 8
+输出: 2
+示例 2:
+
+输入: nums = [5,7,7,8,8,10], target = 6
+输出: 0
+
+
+限制：
+
+0 <= 数组长度 <= 50000
+
+ 
+
+```java
+class Solution {
+	    // 找到一个数字在排序数组出现的次数
+		public int search(int[] nums, int target) {
+	    	// 解题思路找其左右边界
+			int leftIndex = binarySearch_Left(nums,target);
+			if(leftIndex==-1) {
+				return 0;
+			}
+			int rightIndex = binarySearch_Right(nums,target);
+			return rightIndex-leftIndex+1;
+	    }
+		// 找左边界
+		public int binarySearch_Left(int[] nums,int target) {
+			int left = 0;
+			int right = nums.length-1;
+			while(left<=right) {
+				int mid = left + ((right-left)>>1);
+				if(nums[mid]>=target) {
+					right--;
+				}else {
+					left++;
+				}
+			}
+			if(left>=nums.length||nums[left]!=target) {
+				return -1;
+			}
+			return left;
+		}
+		// 找右边界
+		public int binarySearch_Right(int[] nums,int target) {
+			int left = 0;
+			int right = nums.length-1;
+			while(left<=right) {
+				int mid = left + ((right-left)>>1);
+				if(nums[mid]<=target) {
+					left++;
+				}else {
+					right--;
+				}
+			}
+			if(right<0||nums[right]!=target) {
+				return -1;
+			}
+			return right;
+		}
+	}
+```
+
+
+
 ### [4.Leetcode033搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
 
 升序排列的整数数组 nums 在预先未知的某个点上进行了旋转（例如， [0,1,2,4,5,6,7] 经旋转后可能变为 [4,5,6,7,0,1,2] ）。
@@ -3956,6 +4822,60 @@ class Solution {
 	}
 ```
 
+### [5.Leetcode153寻找旋转排序数组中的最小值](https://leetcode-cn.com/problems/find-minimum-in-rotated-sorted-array/)
+
+假设按照升序排序的数组在预先未知的某个点上进行了旋转。例如，数组 [0,1,2,4,5,6,7] 可能变为 [4,5,6,7,0,1,2] 。
+
+请找出其中最小的元素。
+
+ 
+
+示例 1：
+
+输入：nums = [3,4,5,1,2]
+输出：1
+示例 2：
+
+输入：nums = [4,5,6,7,0,1,2]
+输出：0
+示例 3：
+
+输入：nums = [1]
+输出：1
+
+> 二分查找的变形题
+
+```java
+class Solution {
+    public int findMin(int[] nums) {
+// 二分查找
+	    	int left = 0;
+	    	int right = nums.length-1;
+	    	// 剪枝
+	    	
+	    	while(left<=right) {
+	    		// 单调递增时直接返回
+	    		if(nums[left]<=nums[right]) {
+		    		return nums[left];
+		    	}
+	    		
+	    		// 判断哪边有序
+	    		int mid = left + ((right-left)>>1);
+	    		if(nums[left]<=nums[mid]) {
+	    			// 从left到mid之间有序
+	    			left = mid+1;
+	    		}else if(nums[left]>nums[mid]) {
+	    			// 无序
+	    			right = mid;
+	    		}
+	    	}
+	    	return -1;
+    }
+}
+```
+
+
+
 ### [5.Leetcode剑指Offer53 -II 0~N-1中缺失的数字](https://leetcode-cn.com/problems/que-shi-de-shu-zi-lcof/)
 
 一个长度为n-1的递增排序数组中的所有数字都是唯一的，并且每个数字都在范围0～n-1之内。在范围0～n-1内的n个数字中有且只有一个数字不在该数组中，请找出这个数字。
@@ -3991,6 +4911,323 @@ class Solution {
     }
 }
 ```
+
+### [6.Leetcode268丢失的数字](https://leetcode-cn.com/problems/missing-number/)
+
+给定一个包含 [0, n] 中 n 个数的数组 nums ，找出 [0, n] 这个范围内没有出现在数组中的那个数。
+
+ 
+
+进阶：
+
+你能否实现线性时间复杂度、仅使用额外常数空间的算法解决此问题?
+
+
+示例 1：
+
+输入：nums = [3,0,1]
+输出：2
+解释：n = 3，因为有 3 个数字，所以所有的数字都在范围 [0,3] 内。2 是丢失的数字，因为它没有出现在 nums 中。
+
+示例 2：
+
+输入：nums = [0,1]
+输出：2
+解释：n = 2，因为有 2 个数字，所以所有的数字都在范围 [0,2] 内。2 是丢失的数字，因为它没有出现在 nums 中。
+示例 3：
+
+输入：nums = [9,6,4,2,3,5,7,0,1]
+输出：8
+解释：n = 9，因为有 9 个数字，所以所有的数字都在范围 [0,9] 内。8 是丢失的数字，因为它没有出现在 nums 中。
+
+> 解题思路：排序 + 不一样的二分
+
+```java
+class Solution {
+    public int missingNumber(int[] nums) {
+Arrays.sort(nums);
+	    	int left = 0;
+	    	int right = nums.length-1;
+	    	while(left<=right) {
+	    		int mid = left + ((right-left)>>1);
+	    		if(nums[mid]==mid) {
+	    			left = mid+1;
+	    		}else {
+	    			right = mid-1;
+	    		}
+	    	}
+	    	return left;
+    }
+}
+```
+
+## 排序辅助解题
+
+### [1.Leetcode1375有多少小于当前数字的数字](https://leetcode-cn.com/problems/how-many-numbers-are-smaller-than-the-current-number/)
+
+给你一个数组 nums，对于其中每个元素 nums[i]，请你统计数组中比它小的所有数字的数目。
+
+换而言之，对于每个 nums[i] 你必须计算出有效的 j 的数量，其中 j 满足 j != i 且 nums[j] < nums[i] 。
+
+以数组形式返回答案。
+
+
+
+示例 1：
+
+输入：nums = [8,1,2,2,3]
+输出：[4,0,1,1,3]
+解释： 
+对于 nums[0]=8 存在四个比它小的数字：（1，2，2 和 3）。 
+对于 nums[1]=1 不存在比它小的数字。
+对于 nums[2]=2 存在一个比它小的数字：（1）。 
+对于 nums[3]=2 存在一个比它小的数字：（1）。 
+对于 nums[4]=3 存在三个比它小的数字：（1，2 和 2）。
+
+示例 2：
+
+输入：nums = [6,5,4,8]
+输出：[2,1,0,3]
+
+示例 3：
+
+输入：nums = [7,7,7,7]
+输出：[0,0,0,0]
+
+> 解题思路一、暴力破解法
+
+```java
+class Solution {
+    public int[] smallerNumbersThanCurrent(int[] nums) {
+        // 对每个数都对其统计
+	    	int[] res = new int[nums.length];
+	    	for(int i=0;i<nums.length;i++) {
+	    		int count = 0;
+	    		for(int j=0;j<nums.length;j++) {
+	    			if(nums[i]>nums[j]) {
+	    				count++;
+	    			}
+	    		}
+	    		res[i] = count;
+	    	}
+	    	return res;
+    }
+}
+```
+
+> 解题思路二、排序+一个辅助的空间结构
+
+```java
+// 排序来解题 但需一个辅助结构来记录之前的索引
+	    public int[] smallerNumbersThanCurrent_2(int[] nums) {
+	    	// 第一维度记录原来数据 第二维度记录之前的索引
+	    	int[][] new_nums = new int[nums.length][nums.length];
+	    	for(int i=0;i<nums.length;i++) {
+	    		new_nums[i][0] = nums[i];
+	    		new_nums[i][1] = i;
+	    	}
+	    	// 对其按照第一维度排序
+	    	Arrays.sort(new_nums,(a,b)->(a[0]-b[0]));
+	    	
+	    	//结果存储
+    		int prev = -1;
+    		int[] res = new int[nums.length];
+	    	// 接下来统计可
+	    	for(int i=0;i<new_nums.length;i++) {
+	    		// 第一个数或者两个数同
+	    		if(prev==-1 || new_nums[i][0]!=new_nums[i-1][0]) {
+	    			prev = i;
+	    		}
+	    		res[new_nums[i][1]] = prev;
+	    	}
+	    	return res;
+	    }
+```
+
+> 解题思路三、最优 计数排序
+
+```java
+// 计数排序 桶排序
+	    public int[] smallerNumbersThanCurrent_3(int[] nums) {
+	    	// 观察数据范围为0-100之间
+	    	int[] bucket = new int[101];
+	    	// 统计每个数出现的频率
+	    	for(int num:nums) {
+	    		bucket[num]++;
+	    	}
+	    	// 之后对其相加
+	    	for(int i=1;i<101;i++) {
+	    		bucket[i] = bucket[i] + bucket[i-1];
+	    	}
+	    	// 结果
+	    	int[] res = new int[nums.length];
+	    	for(int i=0;i<nums.length;i++) {
+	    		// 这里需考虑0
+	    		res[i] = nums[i]==0?0:bucket[nums[i]-1];
+	    	}
+	    	return res;
+	    }
+```
+
+### [2.Leetcode1122数组的相对排序](https://leetcode-cn.com/problems/relative-sort-array/)
+
+给你两个数组，arr1 和 arr2，
+
+arr2 中的元素各不相同
+arr2 中的每个元素都出现在 arr1 中
+对 arr1 中的元素进行排序，使 arr1 中项的相对顺序和 arr2 中的相对顺序相同。未在 arr2 中出现过的元素需要按照升序放在 arr1 的末尾。
+
+ 
+
+示例：
+
+输入：arr1 = [2,3,1,3,2,4,6,7,9,2,19], arr2 = [2,1,4,3,9,6]
+输出：[2,2,2,1,4,3,3,9,6,7,19]
+
+
+提示：
+
+1 <= arr1.length, arr2.length <= 1000
+0 <= arr1[i], arr2[i] <= 1000
+arr2 中的元素 arr2[i] 各不相同
+arr2 中的每个元素 arr2[i] 都出现在 arr1 中
+
+> 解题思路1：自定义排序。在的话就是索引排序，要不就大小排序。
+>
+> 但注意一点是 int类型无法lambda自定义，二维数组的一维就可以
+>
+> Arrays.sort()只能对包装类型。
+>
+> Collections.sort就可以
+
+```java
+class Solution {
+    public int[] relativeSortArray(int[] arr1, int[] arr2) {
+        // HashSet
+	    	HashMap<Integer,Integer> hashMap = new HashMap<>();
+	    	for(int i=0;i<arr2.length;i++) {
+	    		hashMap.put(arr2[i], i);
+	    	}
+	    	// 自定义排序
+	    	List<Integer> list = new ArrayList<>();
+	    	for(int i=0;i<arr1.length;i++) {
+	    		list.add(arr1[i]);
+	    	}
+	    	Collections.sort(list,(a,b)->{
+	    		if(hashMap.containsKey(a) || hashMap.containsKey(b)) {
+	    			return hashMap.getOrDefault(a, 1001)-hashMap.getOrDefault(b, 1001);
+	    		}
+	    		// 大小排序
+	    		return a-b;
+	    	});
+	    	int[] res = new int[arr1.length];
+	    	// 重新赋值
+	    	for(int i=0;i<arr1.length;i++) {
+	    		res[i] = list.get(i);
+	    	}
+	    	return res;
+    }
+}
+```
+
+> 解题思路二、计数排序
+>
+> 具体地，我们使用一个长度为 10011001（下标从 00 到 10001000）的数组frequency,，记录每一个元素在数组arr1 中出现的次数。随后我们遍历数组arr2,当遍历到元素 xx 时，我们将 frequency[x]个 xx加入答案中，并将 frequency[x] 清零。当遍历结束后，所有在 arr2 中出现过的元素就已经有序了。
+
+```java
+// 数据范围为1000 考虑计数排序
+			// 先从arr1中找到最大值
+			int max = arr1[0];
+			for(int i=1;i<arr1.length;i++) {
+				max = Math.max(max, arr1[i]);
+			}
+			// 开辟空间
+			int[] bucket = new int[max+1];
+			// 存取出现频率
+			for(int num:arr1) {
+				bucket[num]++;
+			}
+			// 结果
+			int[] res = new int[arr1.length];
+			int index = 0;
+			// 遍历arr2
+			for(int num:arr2) {
+				// 肯定有
+				for(int i=0;i<bucket[num];i++) {
+					res[index++] = num;
+				}
+				bucket[num] = 0;
+			}
+			// 遍历剩余的
+			for(int i=0;i<bucket.length;i++) {
+				if(bucket[i]!=0) {
+					// 可能存在多个
+					for(int j=0;j<bucket[i];j++) {
+						res[index++] = i;
+					}
+				}
+			}
+			return res;
+```
+
+### [3.Leetcode057插入区间](https://leetcode-cn.com/problems/insert-interval/)
+
+给出一个无重叠的 ，按照区间起始端点排序的区间列表。
+
+在列表中插入一个新的区间，你需要确保列表中的区间仍然有序且不重叠（如果有必要的话，可以合并区间）。
+
+ 
+
+示例 1：
+
+输入：intervals = [[1,3],[6,9]], newInterval = [2,5]
+输出：[[1,5],[6,9]]
+
+示例 2：
+
+输入：intervals = [[1,2],[3,5],[6,7],[8,10],[12,16]], newInterval = [4,8]
+输出：[[1,2],[3,10],[12,16]]
+解释：这是因为新的区间 [4,8] 与 [3,5],[6,7],[8,10] 重叠。
+
+> 开辟一个空间，将全部值加入，重新排序。
+>
+> 之后重新添加，先添加一个。
+>
+> 后添加的判断是否需要合并，不需要合并直接添加，需要合并，找到最终的终点即可了。
+
+```java
+class Solution {
+    public int[][] insert(int[][] intervals, int[] newInterval) {
+        List<int[]> list = new ArrayList<>();
+	    	// 对其遍历
+	    	for(int[] interval:intervals) {
+	    		list.add(new int[] {interval[0],interval[1]});
+	    	}
+	    	list.add(new int[] {newInterval[0],newInterval[1]});
+	    	// 排序
+	    	Collections.sort(list,(a,b)->(a[0]-b[0]));
+	    	// 之后找寻结果
+	    	List<int[]> res = new ArrayList<>();
+	    	for(int[] cur:list) {
+	    		// 如果为空添加
+	    		if(res.isEmpty()) {
+	    			res.add(cur);
+	    		}else {
+	    			// 里面有值了判断是否需要合并
+	    			int[] last = res.get(res.size()-1);
+	    			if(cur[0]>last[1]) {
+	    				res.add(cur);
+	    			}else {
+	    				res.get(res.size()-1)[1] = Math.max(last[1], cur[1]);
+	    			}
+	    		}
+	    	}
+	    	return res.toArray(new int[res.size()][]);
+    }
+}
+```
+
+
 
 
 
@@ -4069,3 +5306,4 @@ class Solution {
 }
 ```
 
+## 快速排序  归并排序 优先级队列(小顶堆)
