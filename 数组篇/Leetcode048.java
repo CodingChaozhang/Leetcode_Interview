@@ -1,4 +1,3 @@
-package com.lcz.leetcode;
 
 public class Leetcode048 {
 	class Solution {
