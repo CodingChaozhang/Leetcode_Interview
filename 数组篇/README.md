@@ -204,6 +204,64 @@ class Solution {
 	}
 ```
 
+### 前缀和思路[1.Leetcode724寻找数组的中心索引](https://leetcode-cn.com/problems/find-pivot-index/)
+
+给你一个整数数组 nums，请编写一个能够返回数组 “中心索引” 的方法。
+
+数组 中心索引 是数组的一个索引，其左侧所有元素相加的和等于右侧所有元素相加的和。
+
+如果数组不存在中心索引，返回 -1 。如果数组有多个中心索引，应该返回最靠近左边的那一个。
+
+注意：中心索引可能出现在数组的两端。
+
+ 
+
+示例 1：
+
+输入：nums = [1, 7, 3, 6, 5, 6]
+输出：3
+解释：
+中心索引是 3 。
+左侧数之和 (1 + 7 + 3 = 11)，
+右侧数之和 (5 + 6 = 11) ，二者相等。
+
+示例 2：
+
+输入：nums = [1, 2, 3]
+输出：-1
+解释：
+数组中不存在满足此条件的中心索引。
+
+示例 3：
+
+输入：nums = [2, 1, -1]
+输出：0
+解释：
+中心索引是 0 。
+索引 0 左侧不存在元素，视作和为 0 ；
+右侧数之和为 1 + (-1) = 0 ，二者相等。
+
+> 解题思路：左边的值=右边的值即可
+
+```java
+class Solution {
+    public int pivotIndex(int[] nums) {
+        // 前缀和
+	    	// 先统计总和
+	    	int total = Arrays.stream(nums).sum();
+	    	// 左边和
+	    	int sum = 0;
+	    	for(int i=0;i<nums.length;i++) {
+	    		if(sum==total-sum-nums[i]) {
+	    			return i;
+	    		}
+	    		sum += nums[i];
+	    	}
+	    	return -1;
+    }
+}
+```
+
 
 
 ### [2.Leetcode_Offer数组中重复的数字](https://leetcode-cn.com/problems/shu-zu-zhong-zhong-fu-de-shu-zi-lcof/)
@@ -2543,7 +2601,387 @@ class Solution {
 
 
 
+## 滑动窗口解题区间问题
 
+```java
+def findSubArray(nums):
+    N = len(nums) # 数组/字符串长度
+    left, right = 0, 0 # 双指针，表示当前遍历的区间[left, right]，闭区间
+    sums = 0 # 用于统计 子数组/子区间 是否有效，根据题目可能会改成求和/计数
+    res = 0 # 保存最大的满足题目要求的 子数组/子串 长度
+    while right < N: # 当右边的指针没有搜索到 数组/字符串 的结尾
+        sums += nums[right] # 增加当前右边指针的数字/字符的求和/计数
+        while 区间[left, right]不符合题意：# 此时需要一直移动左指针，直至找到一个符合题意的区间
+            sums -= nums[left] # 移动左指针前需要从counter中减少left位置字符的求和/计数
+            left += 1 # 真正的移动左指针，注意不能跟上面一行代码写反
+        # 到 while 结束时，我们找到了一个符合题意要求的 子数组/子串
+        res = max(res, right - left + 1) # 需要更新结果
+        right += 1 # 移动右指针，去探索新的区间
+    return res
+```
+
+
+
+### [1.Leetcode1208尽可能使字符串相等](https://leetcode-cn.com/problems/get-equal-substrings-within-budget/)
+
+给你两个长度相同的字符串，s 和 t。
+
+将 s 中的第 i 个字符变到 t 中的第 i 个字符需要 |s[i] - t[i]| 的开销（开销可能为 0），也就是两个字符的 ASCII 码值的差的绝对值。
+
+用于变更字符串的最大预算是 maxCost。在转化字符串时，总开销应当小于等于该预算，这也意味着字符串的转化可能是不完全的。
+
+如果你可以将 s 的子字符串转化为它在 t 中对应的子字符串，则返回可以转化的最大长度。
+
+如果 s 中没有子字符串可以转化成 t 中对应的子字符串，则返回 0。
+
+ 
+
+示例 1：
+
+输入：s = "abcd", t = "bcdf", cost = 3
+输出：3
+解释：s 中的 "abc" 可以变为 "bcd"。开销为 3，所以最大长度为 3。
+
+示例 2：
+
+输入：s = "abcd", t = "cdef", cost = 3
+输出：1
+解释：s 中的任一字符要想变成 t 中对应的字符，其开销都是 2。因此，最大长度为 1。
+
+> 解题思路：滑动窗口，两个指针，从同一方向出发，两个while循环
+
+```java
+class Solution {
+    public int equalSubstring(String s, String t, int maxCost) {
+       char[] s_arr = s.toCharArray();
+	    	char[] t_arr = t.toCharArray();
+	    	// 代价数组
+	    	int len = s.length();
+	    	int[] cost_arr = new int[len];
+	    	// 初始化
+	    	for(int i=0;i<len;i++) {
+	    		cost_arr[i] = Math.abs(s_arr[i]-t_arr[i]);
+	    	}
+	    	// 对其遍历
+	    	int start = 0;
+	    	int end   = 0;
+	    	int useCost = 0;
+	    	// 结果
+	    	int res = 0;
+	    	while(end<len) {
+	    		useCost += cost_arr[end];
+	    		while(useCost>maxCost) {
+	    			useCost -= cost_arr[start];
+	    			start++;
+	    		}
+	    		res = Math.max(res,end-start+1);
+	    		end++;
+	    	}
+	    	return res;
+    }
+}
+```
+
+> 滑动窗口的思路：通常是用来解决子串的问题。
+
+### [2.Leetcode1052爱生气的书店老板](https://leetcode-cn.com/problems/grumpy-bookstore-owner/)
+
+今天，书店老板有一家店打算试营业 customers.length 分钟。每分钟都有一些顾客（customers[i]）会进入书店，所有这些顾客都会在那一分钟结束后离开。
+
+在某些时候，书店老板会生气。 如果书店老板在第 i 分钟生气，那么 grumpy[i] = 1，否则 grumpy[i] = 0。 当书店老板生气时，那一分钟的顾客就会不满意，不生气则他们是满意的。
+
+书店老板知道一个秘密技巧，能抑制自己的情绪，可以让自己连续 X 分钟不生气，但却只能使用一次。
+
+请你返回这一天营业下来，最多有多少客户能够感到满意的数量。
+
+
+示例：
+
+输入：customers = [1,0,1,2,1,1,7,5], grumpy = [0,1,0,1,0,1,0,1], X = 3
+输出：16
+解释：
+书店老板在最后 3 分钟保持冷静。
+感到满意的最大客户数量 = 1 + 1 + 1 + 1 + 7 + 5 = 16.
+
+> 解题思路：先计算不生气的时候，再计算生气的时候的滑动窗口一次
+
+```java
+class Solution {
+    public int maxSatisfied(int[] customers, int[] grumpy, int X) {
+        // 解题思路：找到所有不生气的， 再计算一次滑动窗口生气中的最大值
+	    	
+	    	int res = 0;
+	    	for(int i=0;i<customers.length;i++) {
+	    		if(grumpy[i]==0) {
+	    			res += customers[i];
+	    			// 顺便使对应顾客数为0
+	    			customers[i] = 0;
+	    		}
+	    	}
+	    	
+	    	// 滑动窗口
+	    	int extra = 0;
+	    	int temp  = 0;
+	    	int l = 0;
+	    	int r = 0;
+	    	// 目前只有生气的有顾客
+	    	while(r<customers.length) {
+	    		temp += customers[r];
+	    		// 判断滑动窗口多了
+	    		if(r-l+1>X) {
+	    			temp -= customers[l];
+	    			l++;
+	    		}
+	    		//记录此时的值
+	    		extra = Math.max(extra, temp);
+	    		r++;
+	    	}
+	    	return res+extra;
+    }
+}
+```
+
+### [3.Leetcode424替换后的最长重复字符](https://leetcode-cn.com/problems/longest-repeating-character-replacement/)
+
+给你一个仅由大写英文字母组成的字符串，你可以将任意位置上的字符替换成另外的字符，总共可最多替换 k 次。在执行上述操作后，找到包含重复字母的最长子串的长度。
+
+注意：字符串长度 和 k 不会超过 104。
+
+ 
+
+示例 1：
+
+输入：s = "ABAB", k = 2
+输出：4
+解释：用两个'A'替换为两个'B',反之亦然。
+
+示例 2：
+
+输入：s = "AABABBA", k = 1
+输出：4
+解释：
+将中间的一个'A'替换为'B',字符串变为 "AABBBBA"。
+子串 "BBBB" 有最长重复字母, 答案为 4。
+
+> 解题思路：滑动窗口来维护
+
+```java
+class Solution {
+    public int characterReplacement(String s, int k) {
+        // 滑动窗口思路解题 // 又出现频率
+	    	char[] arr = s.toCharArray();
+	    	int left = 0;
+	    	int right = 0;
+	    	int maxCount = 0;
+	    	int res = 0;
+	    	// 出现频率
+	    	int[] freq = new int[26];
+	    	while(right<arr.length) {
+	    		freq[arr[right]-'A']++;
+	    		maxCount = Math.max(maxCount, freq[arr[right]-'A']);
+	    		// 扩张
+	    		right++;
+	    		// 开始缩
+	    		if(right-left>maxCount+k) {
+	    			freq[arr[left]-'A']--;
+	    			left++;
+	    		}
+	    		res = Math.max(res, right-left);
+	    	}
+	    	return res;
+    }
+}
+```
+
+滑动窗口扩张
+
+滑动窗口缩放
+
+### [4.Leetcode1004最大连续的个数III](https://leetcode-cn.com/problems/max-consecutive-ones-iii/)
+
+给定一个由若干 0 和 1 组成的数组 A，我们最多可以将 K 个值从 0 变成 1 。
+
+返回仅包含 1 的最长（连续）子数组的长度。
+
+ 
+
+示例 1：
+
+输入：A = [1,1,1,0,0,0,1,1,1,1,0], K = 2
+输出：6
+解释： 
+[1,1,1,0,0,1,1,1,1,1,1]
+粗体数字从 0 翻转到 1，最长的子数组长度为 6。
+示例 2：
+
+输入：A = [0,0,1,1,0,0,1,1,1,0,1,1,0,0,0,1,1,1,1], K = 3
+输出：10
+解释：
+[0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1]
+粗体数字从 0 翻转到 1，最长的子数组长度为 10。
+
+> 滑动窗口，k只是替换0，所以只需统计0即可了。
+
+```java
+class Solution {
+    public int longestOnes(int[] A, int K) {
+        // K即统计0的个数，因为K只是改变0
+	    	int l = 0;
+	    	int r = 0;
+	    	int len = A.length;
+	    	int zeros = 0;
+	    	int res = 0;
+	    	while(r<len) {
+	    		if(A[r]==0) {
+	    			zeros++;
+	    		}
+	    		r++;
+	    		while(zeros>K) {
+	    			if(A[l]==0) {
+	    				zeros--;
+	    			}
+	    			l++;
+	    		}
+	    		res = Math.max(res, r-l);
+	    	}
+	    	return res;
+    }
+}
+```
+
+
+
+## HashMap辅助解题区间问题
+
+给定一个非空且只包含非负数的整数数组 nums，数组的度的定义是指数组里任一元素出现频数的最大值。
+
+你的任务是在 nums 中找到与 nums 拥有相同大小的度的最短连续子数组，返回其长度。
+
+ 
+
+示例 1：
+
+输入：[1, 2, 2, 3, 1]
+输出：2
+解释：
+输入数组的度是2，因为元素1和2的出现频数最大，均为2.
+连续子数组里面拥有相同度的有如下所示:
+[1, 2, 2, 3, 1], [1, 2, 2, 3], [2, 2, 3, 1], [1, 2, 2], [2, 2, 3], [2, 2]
+最短连续子数组[2, 2]的长度为2，所以返回2.
+
+示例 2：
+
+输入：[1,2,2,3,1,4,2]
+输出：6
+
+> 解题思路：hashmap来存储，key为nums[i]的值，value为次数，开始的区间结束的区间
+
+```java
+class Solution {
+    // 数组的度
+	    public int findShortestSubArray(int[] nums) {
+	    	// 用hashmap求解 key为该值 value为次数，开始 结束位置
+	    	HashMap<Integer,int[]> hashMap = new HashMap<>();
+	    	// 遍历
+	    	for(int i=0;i<nums.length;i++) {
+	    		// 不是第一次放入
+	    		if(hashMap.containsKey(nums[i])) {
+	    			// 更新值
+	    			hashMap.get(nums[i])[0]++;
+	    			// 更新最后一个区间的值
+	    			hashMap.get(nums[i])[2]=i;
+	    			
+	    			
+	    		}else {
+	    			// 第一次放入
+	    			hashMap.put(nums[i], new int[] {1,i,i});
+	    		}	
+	    	}
+	    	// 度
+	    	int res = 0;
+	    	// 长度
+	    	int minLen = 0;
+	    	// 对其hahsmap遍历
+	    	for(Map.Entry<Integer, int[]> map:hashMap.entrySet()) {
+	    		int[] arr = map.getValue();
+	    		if(res<arr[0]) {
+	    			// 初始化
+	    			res = arr[0];
+	    			minLen = arr[2]-arr[1]+1;
+	    		}else if(res==arr[0]) {
+	    			//更新度的最小长度
+	    			minLen = Math.min(minLen, arr[2]-arr[1]+1);
+	    		}
+	    	}
+	    	return minLen;
+	    	
+	    }
+}
+```
+
+## 单调队列辅助解题
+
+### [1.Leetcode239滑动窗口最大值](https://leetcode-cn.com/problems/sliding-window-maximum/)
+
+给你一个整数数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。
+
+返回滑动窗口中的最大值。
+
+ 
+
+示例 1：
+
+输入：nums = [1,3,-1,-3,5,3,6,7], k = 3
+输出：[3,3,5,5,6,7]
+解释：
+滑动窗口的位置                最大值
+---------------               -----
+[1  3  -1] -3  5  3  6  7       3
+ 1 [3  -1  -3] 5  3  6  7       3
+ 1  3 [-1  -3  5] 3  6  7       5
+ 1  3  -1 [-3  5  3] 6  7       5
+ 1  3  -1  -3 [5  3  6] 7       6
+ 1  3  -1  -3  5 [3  6  7]      7
+示例 2：
+
+输入：nums = [1], k = 1
+输出：[1]
+
+> 维护一个单调队列
+
+```java
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+       // 判断
+	    	if(nums==null || nums.length<2 || k==1) {
+	    		return nums;
+	    	}
+	    	// 维护一个队头元素始终是队列最大
+	    	Deque<Integer> queue = new LinkedList<>();
+	    	// 结果数组
+	    	int[] res = new int[nums.length-k+1];
+	    	// 遍历
+	    	for(int i=0;i<nums.length;i++) {
+	    		
+	    		// 放入的元素已经够窗口的值了 删除过期值
+	    		while(!queue.isEmpty()&&queue.peekFirst()<=i-k) {
+	    			queue.pollFirst();
+	    		}
+	    		// 判断放入的值是否大于
+	    		while(!queue.isEmpty()&&nums[queue.peekLast()]<=nums[i]) {
+	    			queue.pollLast();
+	    		}
+	    		// 放入
+	    		queue.addLast(i);
+	    		// 判断窗口长度是否大于等于k个的时候才开始计算
+	    		if(i-k+1>=0) {
+	    			res[i-k+1] = nums[queue.peekFirst()];
+	    		}
+	    	}
+	    	return res;
+    }
+}
+```
 
 
 
@@ -4346,6 +4784,296 @@ class FrontMiddleBackQueue {
 	 * int param_5 = obj.popMiddle();
 	 * int param_6 = obj.popBack();
 	 */
+```
+
+### [18.Leetcode665非递减数列](https://leetcode-cn.com/problems/non-decreasing-array/)
+
+给你一个长度为 n 的整数数组，请你判断在 最多 改变 1 个元素的情况下，该数组能否变成一个非递减数列。
+
+我们是这样定义一个非递减数列的： 对于数组中任意的 i (0 <= i <= n-2)，总满足 nums[i] <= nums[i + 1]。
+
+ 
+
+示例 1:
+
+输入: nums = [4,2,3]
+输出: true
+解释: 你可以通过把第一个4变成1来使得它成为一个非递减数列。
+
+示例 2:
+
+输入: nums = [4,2,1]
+输出: false
+解释: 你不能在只改变一个元素的情况下将其变为非递减数列。
+
+> 解题思路：如果前一个大于后一个，我们如何使其继续成为一个递增数列么？要不前一个减少，要不后一个增加，具体取决于前一个的前一个的大小与后一个的大小比较
+
+```java
+package com.lcz.leetcode;
+// 非递减数列
+public class Leetcode665 {
+	class Solution {
+	    // 判断存在几个谷底 两个数大，有两种选择，前一个变小 或者后一个变大，具体选择看前一个的前一个
+		public boolean checkPossibility(int[] nums) {
+	    	int count = 0;
+	    	if(nums.length<3) {
+	    		return true;
+	    	}
+	    	// 最开始两个只有1个选择
+	    	if(nums[0]>nums[1]) {
+	    		nums[0] = nums[1];
+	    		count++;
+	    	}
+	    	
+	    	// 后面的
+	    	for(int i=1;i<nums.length-1;i++) {
+	    		int right = nums[i+1];
+	    		if(nums[i]>right) {
+	    			count++;
+	    			if(count>1) {
+	    				return false;
+	    			}
+	    			int left =  nums[i-1];
+	    			if(left>right) {
+	    				nums[i+1]=nums[i];
+	    			}else {
+	    				nums[i] = left;
+	    			}
+	    		}
+	    		
+	    	}
+	    	return true;
+	    }
+	}
+}
+
+```
+
+### [19.Leetcode561数组拆分I](https://leetcode-cn.com/problems/array-partition-i/)
+
+给定长度为 2n 的整数数组 nums ，你的任务是将这些数分成 n 对, 例如 (a1, b1), (a2, b2), ..., (an, bn) ，使得从 1 到 n 的 min(ai, bi) 总和最大。
+
+返回该 最大总和 。
+
+ 
+
+示例 1：
+
+输入：nums = [1,4,3,2]
+输出：4
+解释：所有可能的分法（忽略元素顺序）为：
+1. (1, 4), (2, 3) -> min(1, 4) + min(2, 3) = 1 + 2 = 3
+2. (1, 3), (2, 4) -> min(1, 3) + min(2, 4) = 1 + 2 = 3
+3. (1, 2), (3, 4) -> min(1, 2) + min(3, 4) = 1 + 3 = 4
+所以最大总和为 4
+示例 2：
+
+输入：nums = [6,2,6,5,1,2]
+输出：9
+解释：最优的分法为 (2, 1), (2, 5), (6, 6). min(2, 1) + min(2, 5) + min(6, 6) = 1 + 2 + 6 = 9
+
+
+
+> 解题思路：排序之后+计算奇数上的和
+
+```java
+class Solution {
+    public int arrayPairSum(int[] nums) {
+        // 排序
+	    	Arrays.sort(nums);
+	    	// 和
+	    	int sum = 0;
+	    	for(int i=0;i<nums.length-1;i+=2) {
+	    		sum += nums[i];
+	    	}
+	    	return sum;
+    }
+}
+```
+
+
+
+### [20.Leetcode832翻转图像](https://leetcode-cn.com/problems/flipping-an-image/)
+
+给定一个二进制矩阵 A，我们想先水平翻转图像，然后反转图像并返回结果。
+
+水平翻转图片就是将图片的每一行都进行翻转，即逆序。例如，水平翻转 [1, 1, 0] 的结果是 [0, 1, 1]。
+
+反转图片的意思是图片中的 0 全部被 1 替换， 1 全部被 0 替换。例如，反转 [0, 1, 1] 的结果是 [1, 0, 0]。
+
+ 
+
+示例 1：
+
+输入：[[1,1,0],[1,0,1],[0,0,0]]
+输出：[[1,0,0],[0,1,0],[1,1,1]]
+解释：首先翻转每一行: [[0,1,1],[1,0,1],[0,0,0]]；
+     然后反转图片: [[1,0,0],[0,1,0],[1,1,1]]
+示例 2：
+
+输入：[[1,1,0,0],[1,0,0,1],[0,1,1,1],[1,0,1,0]]
+输出：[[1,1,0,0],[0,1,1,0],[0,0,0,1],[1,0,1,0]]
+解释：首先翻转每一行: [[0,0,1,1],[1,0,0,1],[1,1,1,0],[0,1,0,1]]；
+     然后反转图片: [[1,1,0,0],[0,1,1,0],[0,0,0,1],[1,0,1,0]]
+
+
+
+> 解题思路：逻辑梳理之后。从整体上来看。
+
+```java
+class Solution {
+     public int[][] flipAndInvertImage(int[][] image) {
+	    	int row = image.length-1;
+	    	int col = image[0].length-1;
+	    	// 开始遍历
+	    	for(int i=0;i<=row;i++) {
+	    		// 翻转图像
+	    		reverse(image,i,0,col);	    		
+	    	}
+	    	return image;
+	    }
+	    
+	    public void reverse(int[][] image,int row,int start_col,int end_col) {
+	    	// 开始遍历
+	    	while(start_col<=end_col) {
+	    		int temp = image[row][start_col]==1?0:1;
+	    		image[row][start_col] = image[row][end_col]==1?0:1;
+	    		image[row][end_col]   = temp;
+	    		// 开始走
+	    		start_col++;
+	    		end_col--;
+	    	}
+	    }
+}
+```
+
+### [21.Leetcode867转置矩阵](https://leetcode-cn.com/problems/transpose-matrix/)
+
+给你一个二维整数数组 matrix， 返回 matrix 的 转置矩阵 。
+
+矩阵的 转置 是指将矩阵的主对角线翻转，交换矩阵的行索引与列索引。
+
+![img](https://assets.leetcode.com/uploads/2021/02/10/hint_transpose.png)
+
+ 
+
+示例 1：
+
+输入：matrix = [[1,2,3],[4,5,6],[7,8,9]]
+输出：[[1,4,7],[2,5,8],[3,6,9]]
+
+示例 2：
+
+输入：matrix = [[1,2,3],[4,5,6]]
+输出：[[1,4],[2,5],[3,6]]
+
+> 解题思路：开启一个新数组，将i和j颠倒即可
+
+```java
+class Solution {
+    public int[][] transpose(int[][] matrix) {
+        int row = matrix.length;
+	    	int col = matrix[0].length;
+	    	// 开始新的空间
+	    	int[][] new_matrix = new int[col][row];
+	    	// 开始遍历
+	    	for(int i=0;i<row;i++) {
+	    		for(int j=0;j<col;j++) {
+	    			new_matrix[j][i] = matrix[i][j];	    			
+	    		}
+	    	}
+	    	return new_matrix;
+    }
+}
+```
+
+### [22.Leetcode896单调数列](https://leetcode-cn.com/problems/monotonic-array/)
+
+
+如果数组是单调递增或单调递减的，那么它是*单调的*。
+
+如果对于所有 `i <= j`，`A[i] <= A[j]`，那么数组 `A` 是单调递增的。 如果对于所有 `i <= j`，`A[i]> = A[j]`，那么数组 `A` 是单调递减的。
+
+当给定的数组 `A` 是单调数组时返回 `true`，否则返回 `false`。
+
+
+
+**示例 1：**
+
+```
+输入：[1,2,2,3]
+输出：true
+```
+
+**示例 2：**
+
+```
+输入：[6,5,4,4]
+输出：true
+```
+
+**示例 3：**
+
+```
+输入：[1,3,2]
+输出：false
+```
+
+> 解题思路：单调数列，可能为递增或者递减，如果出现一个符合条件就可以了，
+
+```java
+class Solution {
+    public boolean isMonotonic(int[] A) {
+       // 其有两个状态
+	    	boolean incr = true, decr = true;
+	    	for(int i=0;i<A.length-1;i++) {
+	    		if(A[i]>A[i+1]) {
+	    			incr = false;
+	    		}
+	    		if(A[i]<A[i+1]) {
+	    			decr = false;
+	    		}
+	    	}
+	    	return incr || decr;
+    }
+}
+```
+
+### [23.Leetcode766托普利茨矩阵](https://leetcode-cn.com/problems/toeplitz-matrix/)
+
+给你一个 m x n 的矩阵 matrix 。如果这个矩阵是托普利茨矩阵，返回 true ；否则，返回 false 。
+
+如果矩阵上每一条由左上到右下的对角线上的元素都相同，那么这个矩阵是 托普利茨矩阵 。
+
+ ![img](https://assets.leetcode.com/uploads/2020/11/04/ex1.jpg)
+
+示例 1：
+
+
+输入：matrix = [[1,2,3,4],[5,1,2,3],[9,5,1,2]]
+输出：true
+解释：
+在上述矩阵中, 其对角线为: 
+"[9]", "[5, 5]", "[1, 1, 1]", "[2, 2, 2]", "[3, 3]", "[4]"。 
+各条对角线上的所有元素均相同, 因此答案是 True 。
+
+> 解题思路：除了第一行与第一列的元素，都遍历与左上角的元素对比
+
+```java
+class Solution {
+   public boolean isToeplitzMatrix(int[][] matrix) {
+	    	boolean flag = true;
+	    	for(int i=1;i<matrix.length;i++) {
+	    		for(int j=1;j<matrix[0].length;j++) {
+	    			if(matrix[i][j]!=matrix[i-1][j-1]) {
+	    				return false;
+	    			}
+	    		}
+	    	}
+	    	return flag;
+	    }
+	    
+}
 ```
 
 
