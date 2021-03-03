@@ -2849,7 +2849,490 @@ class Solution {
 }
 ```
 
+### [5.Leetcode1493删掉一个元素以后全为1的最长子数组](https://leetcode-cn.com/problems/longest-subarray-of-1s-after-deleting-one-element/)
 
+给你一个二进制数组 nums ，你需要从中删掉一个元素。
+
+请你在删掉元素的结果数组中，返回最长的且只包含 1 的非空子数组的长度。
+
+如果不存在这样的子数组，请返回 0 。
+
+ 
+
+提示 1：
+
+输入：nums = [1,1,0,1]
+输出：3
+解释：删掉位置 2 的数后，[1,1,1] 包含 3 个 1 。
+示例 2：
+
+输入：nums = [0,1,1,1,0,1,1,0,1]
+输出：5
+解释：删掉位置 4 的数字后，[0,1,1,1,1,1,0,1] 的最长全 1 子数组为 [1,1,1,1,1] 。
+示例 3：
+
+输入：nums = [1,1,1]
+输出：2
+解释：你必须要删除一个元素
+
+> 解题数组：滑动窗口的解法
+
+```java
+class Solution {
+    public int longestSubarray(int[] nums) {
+        int l = 0;
+	    	int r = 0;
+	    	int sum = 0;
+	    	// 统计其中零的个数
+	    	int zeros = 0;
+	    	while(r<nums.length) {
+	    		 if(nums[r]==0) {
+	    			zeros++;
+	    		 }
+	    		 r++;
+	    		 // 加到一定数量
+	    		 while(zeros>1) {
+	    			 if(nums[l]==0) {
+	    				 zeros--;
+	    			 }
+	    			 l++;
+	    		 }
+	    		 sum = Math.max(sum, r-l-1);
+	    	}
+	    	return sum;
+    }
+}
+```
+
+### [6.Leetcode003无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)-结合了hashmap+滑动窗口
+
+给定一个字符串，请你找出其中不含有重复字符的 最长子串 的长度。
+
+ 
+
+示例 1:
+
+输入: s = "abcabcbb"
+输出: 3 
+解释: 因为无重复字符的最长子串是 "abc"，所以其长度为 3。
+
+示例 2:
+
+输入: s = "bbbbb"
+输出: 1
+解释: 因为无重复字符的最长子串是 "b"，所以其长度为 1。
+
+示例 3:
+
+输入: s = "pwwkew"
+输出: 3
+解释: 因为无重复字符的最长子串是 "wke"，所以其长度为 3。
+     请注意，你的答案必须是 子串 的长度，"pwke" 是一个子序列，不是子串。
+
+> 解题思路：用滑动窗口+hahsmap结构的思路来解题
+
+```java
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        char[] arr = s.toCharArray();
+	    	// 对其用hashMap
+	    	HashMap<Character,Integer> hashMap = new HashMap<>();
+	    	// 滑动窗口的解法
+	    	int l = 0;
+	    	int r = 0;
+	    	int sum = 0;
+	    	while(r<arr.length) {
+	    		// 满足条件则扩大
+	    		char c = arr[r];
+
+	    		if(hashMap.containsKey(c)) {
+	    			l = Math.max(l, hashMap.get(c)+1);
+	    		}
+	    		hashMap.put(c, r);
+	    		sum = Math.max(sum, r-l+1);
+	    		r++;
+	    	}
+	    	return sum;
+    }
+}
+```
+
+### [7.Leetcode209长度最小的子数组](https://leetcode-cn.com/problems/minimum-size-subarray-sum/)
+
+给定一个含有 n 个正整数的数组和一个正整数 target 。
+
+找出该数组中满足其和 ≥ target 的长度最小的 连续子数组 [numsl, numsl+1, ..., numsr-1, numsr] ，并返回其长度。如果不存在符合条件的子数组，返回 0 。
+
+ 
+
+示例 1：
+
+输入：target = 7, nums = [2,3,1,2,4,3]
+输出：2
+解释：子数组 [4,3] 是该条件下的长度最小的子数组。
+
+示例 2：
+
+输入：target = 4, nums = [1,4,4]
+输出：1
+
+示例 3：
+
+输入：target = 11, nums = [1,1,1,1,1,1,1,1]
+输出：0
+
+> 解题思路：用滑动窗口  什么时候左边 什么时候右边
+
+```java
+class Solution {
+    public int minSubArrayLen(int target, int[] nums) {
+       // 解题思路：滑动窗口的解法
+	    	int l = 0;
+	    	int r = 0;
+	    	// 其中的一个临时数组和
+	    	int temp = 0;
+	    	// 结果
+	    	int res = nums.length+1;
+	    	while(r<nums.length) {
+	    		temp += nums[r];
+	    		
+	    		while(temp>=target) {
+	    			temp-=nums[l];
+	    			res = Math.min(res, r-l+1);
+	    			l++;
+	    			
+	    		}
+	    		// 扩大
+	    		r++;
+	    	}
+	    	return res==nums.length+1?0:res;
+    }
+}
+```
+
+### [8.Leetcode076最小覆盖子串](https://leetcode-cn.com/problems/minimum-window-substring/)
+
+给你一个字符串 s 、一个字符串 t 。返回 s 中涵盖 t 所有字符的最小子串。如果 s 中不存在涵盖 t 所有字符的子串，则返回空字符串 "" 。
+
+注意：如果 s 中存在这样的子串，我们保证它是唯一的答案。
+
+ 
+
+示例 1：
+
+输入：s = "ADOBECODEBANC", t = "ABC"
+输出："BANC"
+示例 2：
+
+输入：s = "a", t = "a"
+输出："a"
+
+> 解题思路：滑动窗口，用数组来记录
+
+```java
+class Solution {
+    public String minWindow(String s, String t) {
+        if(s==""||s==null||t==""||t==null||s.length()<t.length()){
+            return "";
+        }
+
+        // 记录其值
+        int[] need = new int[128];
+        for(int i=0;i<t.length();i++){
+            need[t.charAt(i)]++;
+        }
+        int[] windows = new int[128];
+        int left = 0, right = 0;
+        int count = 0;
+        int minLength = s.length()+1;
+        //  结果
+        String res = "";
+        // 开始
+        while(right<s.length()){
+            char ch = s.charAt(right);
+            windows[ch]++;
+            if(need[ch]>0&&need[ch]>=windows[ch]){
+                count++;
+            }
+
+            // 收缩左侧
+            while(count==t.length()){
+                ch = s.charAt(left);
+                if(need[ch]>0&&need[ch]>=windows[ch]){
+                    count--;
+                }
+                //记录结果
+                if(right-left+1<minLength){
+                    minLength = right-left+1;
+                    res = s.substring(left,right+1);
+                }
+
+                windows[ch]--;
+                left++;
+            }
+            right++;
+        }
+        return res;
+    }
+}
+```
+
+### [9.Leetcode438找到字符串中所有字母异位词](https://leetcode-cn.com/problems/find-all-anagrams-in-a-string/)
+
+给定一个字符串 s 和一个非空字符串 p，找到 s 中所有是 p 的字母异位词的子串，返回这些子串的起始索引。
+
+字符串只包含小写英文字母，并且字符串 s 和 p 的长度都不超过 20100。
+
+说明：
+
+字母异位词指字母相同，但排列不同的字符串。
+不考虑答案输出的顺序。
+示例 1:
+
+输入:
+s: "cbaebabacd" p: "abc"
+
+输出:
+[0, 6]
+
+解释:
+起始索引等于 0 的子串是 "cba", 它是 "abc" 的字母异位词。
+起始索引等于 6 的子串是 "bac", 它是 "abc" 的字母异位词。
+
+> 数组代替hahsMap的作用，并且用滑动窗口的解题思路
+
+```java
+package com.lcz.leetcode;
+import java.util.*;
+public class Leetcode0438 {
+	class Solution {
+	    public List<Integer> findAnagrams(String s, String p) {
+	    	// 统计次数
+	    	// 起到hashMap的作用了
+	    	int[] need = new int[26];
+	    	for(int i=0;i<p.length();i++) {
+	    		need[p.charAt(i)-'a']++;
+	    	}
+	    	// 结果
+	    	List<Integer> res = new ArrayList<>();
+	    	// 对其遍历
+	    	for(int i=0;i<=s.length()-p.length();i++) {
+	    		
+	    		int j=i;
+	    		// 复制数组
+	    		int[] temp = Arrays.copyOf(need,26);
+	    		for(;j<s.length()&&j<i+p.length();j++) {
+	    			// 开始统计
+	    			if(--temp[s.charAt(j)-'a']<0){
+	    				break;
+	    			}
+	    		}
+	    		if(j>=i+p.length()) {
+	    			res.add(i);
+	    		}
+	    	}
+	    	return res;
+	    	
+	    	
+	    }
+	}
+}
+
+```
+
+滑动窗口解法
+
+```java
+class Solution {
+    public List<Integer> findAnagrams(String s, String p) {
+        // 对其统计
+	    	int[] freq = new int[26];
+	    	for(int i=0;i<p.length();i++) {
+	    		freq[p.charAt(i)-'a']++;
+	    	}
+	    	// 滑窗
+	    	int l = 0;
+	    	int r = 0;
+	    	List<Integer> res = new ArrayList<>();
+	    	while(r<s.length()) {
+	    		// 扩张
+	    		freq[s.charAt(r)-'a']--;
+	    		while(freq[s.charAt(r)-'a']<0) {
+	    			// 移动
+	    			freq[s.charAt(l)-'a']++;
+	    			l++;
+	    		}
+                r++;
+
+	    		if(r-l==p.length()){
+	    			res.add(l);
+	    		}
+	    		
+	    	}
+	    	return res;
+    }
+}
+```
+
+
+
+
+
+### [10.Leetcode567字符串的排列](https://leetcode-cn.com/problems/permutation-in-string/)
+
+给定两个字符串 s1 和 s2，写一个函数来判断 s2 是否包含 s1 的排列。
+
+换句话说，第一个字符串的排列之一是第二个字符串的子串。
+
+ 
+
+示例 1：
+
+输入: s1 = "ab" s2 = "eidbaooo"
+输出: True
+解释: s2 包含 s1 的排列之一 ("ba").
+示例 2：
+
+输入: s1= "ab" s2 = "eidboaoo"
+输出: False
+
+> 解题思路：滑动窗口
+
+```java
+class Solution {
+    public boolean checkInclusion(String s1, String s2) {
+       // 滑动窗口的解法
+	    	// 统计频率
+	    	int len1 = s1.length();
+	    	int len2 = s2.length();
+	    	// 统计频率
+	    	int[] freq = new int[26];
+	    	for(int i=0;i<len1;i++) {
+	    		freq[s1.charAt(i)-'a']++;
+	    	}
+	    	int l = 0;
+	    	int r = 0;
+	    	// 开始滑窗 对s2的遍历
+	    	while(r<len2) {
+	    		freq[s2.charAt(r)-'a']--;
+	    		// 如果为0
+	    		while(freq[s2.charAt(r)-'a']<0) {
+	    			// 不满足条件 移动左边的l
+	    			freq[s2.charAt(l)-'a']++;
+	    			l++;
+	    			
+	    		}
+	    		r++;
+	    		if(r-l==len1) {
+	    			return true;
+	    		}
+	    		
+	    	}
+	    	return false;
+	    	
+    }
+}
+```
+
+### [11.Leetcode978最长湍流子数组](https://leetcode-cn.com/problems/longest-turbulent-subarray/)
+
+
+当 `A` 的子数组 `A[i], A[i+1], ..., A[j]` 满足下列条件时，我们称其为*湍流子数组*：
+
+- 若 `i <= k < j`，当 `k` 为奇数时， `A[k] > A[k+1]`，且当 `k` 为偶数时，`A[k] < A[k+1]`；
+- **或** 若 `i <= k < j`，当 `k` 为偶数时，`A[k] > A[k+1]` ，且当 `k` 为奇数时， `A[k] < A[k+1]`。
+
+也就是说，如果比较符号在子数组中的每个相邻元素对之间翻转，则该子数组是湍流子数组。
+
+返回 `A` 的最大湍流子数组的**长度**。
+
+ 
+
+**示例 1：**
+
+```
+输入：[9,4,2,10,7,8,8,1,9]
+输出：5
+解释：(A[1] > A[2] < A[3] > A[4] < A[5])
+```
+
+**示例 2：**
+
+```
+输入：[4,8,12,16]
+输出：2
+```
+
+> 动态规划解题的思路
+
+```java
+class Solution {
+    public int maxTurbulenceSize(int[] arr) {
+        // 初始两个状态
+	    	int down = 1;
+	    	int up   = 1;
+	    	// 结果
+	    	int res  = 1;
+	    	for(int i=1;i<arr.length;i++) {
+	    		if(arr[i]>arr[i-1]) {
+	    			up = down+1;
+	    			down = 1;
+	    		}else if(arr[i]<arr[i-1]) {
+	    			down = up+1;
+	    			up = 1;
+	    		}else if(arr[i]==arr[i-1]) {
+	    			down = 1;
+	    			up = 1;
+	    		}
+	    		res = Math.max(res, Math.max(up,down));
+	    	}
+	    	return res;
+    }
+}
+```
+
+### [12.Leetcode376摆动序列](https://leetcode-cn.com/problems/wiggle-subsequence/)
+
+如果连续数字之间的差严格地在正数和负数之间交替，则数字序列称为摆动序列。第一个差（如果存在的话）可能是正数或负数。少于两个元素的序列也是摆动序列。
+
+例如， [1,7,4,9,2,5] 是一个摆动序列，因为差值 (6,-3,5,-7,3) 是正负交替出现的。相反, [1,4,7,2,5] 和 [1,7,4,5,5] 不是摆动序列，第一个序列是因为它的前两个差值都是正数，第二个序列是因为它的最后一个差值为零。
+
+给定一个整数序列，返回作为摆动序列的最长子序列的长度。 通过从原始序列中删除一些（也可以不删除）元素来获得子序列，剩下的元素保持其原始顺序。
+
+示例 1:
+
+输入: [1,7,4,9,2,5]
+输出: 6 
+解释: 整个序列均为摆动序列。
+示例 2:
+
+输入: [1,17,5,10,13,15,10,5,16,8]
+输出: 7
+解释: 这个序列包含几个长度为 7 摆动序列，其中一个可为[1,17,10,13,10,16,8]。
+
+> 解题思路：不要求连续。
+
+```java
+class Solution {
+    public int wiggleMaxLength(int[] nums) {
+        if(nums.length<1) {
+	    		return 0;
+	    	}
+        int up =1 ;
+	    	int down = 1;
+	    	int res = 1;
+	    	for(int i=1;i<nums.length;i++) {
+	    		if(nums[i]>nums[i-1]) {
+	    			up = down+1;
+	    		}else if(nums[i]<nums[i-1]) {
+	    			down = up+1;
+	    		}
+	    		res = Math.max(up, down);
+	    	}
+	    	return res;
+    }
+}
+```
 
 ## HashMap辅助解题区间问题
 
