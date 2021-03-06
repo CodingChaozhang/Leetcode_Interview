@@ -1,5 +1,7 @@
 # Leetcode-数组篇
 
+
+
 ## 数组原地修改解题
 
 这类题有共性，就是1-n数字
@@ -7027,6 +7029,8 @@ class Solution {
 	}
 ```
 
+可将其看成一个图，图中的点与点之间的转换。
+
 
 
 
@@ -7510,38 +7514,41 @@ class Solution {
 
 ```java
 class Solution {
-	    public int search(int[] nums, int target) {
-	    	// 可用二分查找的办法
-	    	return binarySearch(nums, 0, nums.length-1, target);
-	    }
-	    public int binarySearch(int[] nums,int left,int right,int target) {
-	    	while(left<=right) {
-	    		int mid = left + ((right-left)>>1);
-	    		if(nums[mid]==target) {
-	    			return mid;
-	    		}
-	    		// 判断mid哪个区间是有序的
-	    		if(nums[mid]>=nums[left]) {
-	    			// 从left到mid之间是有序的
-	    			// 再接着判断target在哪里
-	    			if(target>=nums[left]&&target<nums[mid]) {
-	    				right = mid-1;
-	    			}else {
-	    				left =  mid+1;
-	    			}
-	    		}else {
-	    			// 从mid到right之间是有序的
-	    			if(target>nums[mid]&&target<=nums[right]) {
-	    				left =  mid + 1;
-	    			}else {
-	    				right = mid - 1;
-	    			}
-	    		}
-	    	}
-	    	
-	    	return -1;
-	    }
-	}
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length-1;
+        while(left<=right){
+            int mid = left + ((right-left)>>1);
+            if(nums[mid]==target){
+                return mid;
+            }
+            // 判断哪边有序
+            if(nums[mid]>=nums[0]){
+                // 左边有序
+                //查找
+                if(nums[left]<=target&& target<nums[mid]){
+                    // 在左边
+                    right = mid - 1;
+                }else{
+                    // 在右边
+                    left = mid + 1;
+                }
+
+            }else{
+                // 右边有序
+                if(nums[mid]<target&&target<=nums[right]){
+                    // 在右边
+                    left = mid + 1;
+                }else{
+                    // 在左边
+                    right = mid - 1;
+                }
+            }
+        }
+
+        return -1;
+    }
+}
 ```
 
 ### [5.Leetcode153寻找旋转排序数组中的最小值](https://leetcode-cn.com/problems/find-minimum-in-rotated-sorted-array/)
@@ -8176,3 +8183,1133 @@ class Solution {
 ```
 
 ## 快速排序  归并排序 优先级队列(小顶堆)
+
+
+
+## 面试题篇
+
+### [1.面试题01.01 判定字符是否唯一解题思路hashMap](https://leetcode-cn.com/problems/is-unique-lcci/) 
+
+实现一个算法，确定一个字符串 s 的所有字符是否全都不同。
+
+示例 1：
+
+输入: s = "leetcode"
+输出: false 
+
+示例 2：
+
+输入: s = "abc"
+输出: true
+
+> 解题思路：hashMap辅助结构
+
+```java
+class Solution {
+    public boolean isUnique(String astr) {
+        // 用HashMap
+        HashMap<Character,Integer> dict= new HashMap<>();
+        // 转换为数组
+        char[] arr = astr.toCharArray();
+        // 对其遍历
+        for(int i=0;i<arr.length;i++){
+            // 不包含则放入
+            if(!dict.containsKey(arr[i])){
+                dict.put(arr[i],1);
+            }else{
+                return false;
+            }
+        }
+        return true;
+    }
+}
+```
+
+### [2.面试题01.02 判定是否互为字符重排-解题思路 HashMap或者字典频率数组](https://leetcode-cn.com/problems/check-permutation-lcci/)
+
+```java
+class Solution {
+    public boolean CheckPermutation(String s1, String s2) {
+        if(s1.length()!=s2.length()){
+            return false;
+        }
+        // 用两个数组
+        int[] dict_s1 = new int[128];
+        int[] dict_s2 = new int[128];
+        // 遍历
+        for(int i=0;i<s1.length();i++){
+            dict_s1[s1.charAt(i)-'a']++;
+            dict_s2[s2.charAt(i)-'a']++;
+        }
+        // 判断
+        for(int i=0;i<128;i++){
+            if(dict_s1[i]!=dict_s2[i]){
+                return false;
+            }
+        }
+        return true;
+    }
+}
+```
+
+### [3.面试题01.07旋转矩阵-解题思路 逻辑整体](https://leetcode-cn.com/problems/rotate-matrix-lcci/)
+
+给你一幅由 N × N 矩阵表示的图像，其中每个像素的大小为 4 字节。请你设计一种算法，将图像旋转 90 度。
+
+不占用额外内存空间能否做到？
+
+ 
+
+示例 1:
+
+给定 matrix = 
+[
+  [1,2,3],
+  [4,5,6],
+  [7,8,9]
+],
+
+原地旋转输入矩阵，使其变为:
+[
+  [7,4,1],
+  [8,5,2],
+  [9,6,3]
+]
+
+> 解题思路：整体的思路来看
+
+```java
+class Solution {
+	    public void rotate(int[][] matrix) {
+	    	int start_row = 0;
+	    	int start_col = 0;
+	    	int end_row = matrix.length-1;
+	    	int end_col = matrix[0].length-1;
+	    	// 判断
+	    	while(start_row<end_row) {
+	    		process(matrix,start_row++,start_col++,end_row--,end_col--);
+	    	}
+	    }
+	    // 转换
+	    public void process(int[][] matrix,int start_row,int start_col,int end_row,int end_col) {
+	    	// 转换的次数
+	    	int flag = end_col - start_col;
+	    	for(int i=0;i<flag;i++) {
+	    		int temp 					   = matrix[start_row][start_col+i];
+	    		matrix[start_row][start_col+i] = matrix[end_row-i][start_col];
+	    		matrix[end_row-i][start_col]   = matrix[end_row][end_col-i];
+	    		matrix[end_row][end_col-i]     = matrix[start_row+i][end_col];
+	    		matrix[start_row+i][end_col]   = temp;
+	    	}
+	    }
+	}
+```
+
+### [4.面试题01.08 零矩阵](https://leetcode-cn.com/problems/zero-matrix-lcci/)
+
+编写一种算法，若M × N矩阵中某个元素为0，则将其所在的行与列清零。
+
+ 
+
+示例 1：
+
+输入：
+[
+  [1,1,1],
+  [1,0,1],
+  [1,1,1]
+]
+输出：
+[
+  [1,0,1],
+  [0,0,0],
+  [1,0,1]
+]
+
+> 解题思路：开辟一个boolean数组，用来存储行和列。如果第一次出现0记录位置，第二次遍历的时候更改即可。
+
+```java
+class Solution {
+    public void setZeroes(int[][] matrix) {
+        // 开辟两个行 列数组来保存是否出现0了
+	    	int rows = matrix.length;
+	    	int cols = matrix[0].length;
+	    	boolean[] row_arr = new boolean[rows];
+	    	boolean[] row_col = new boolean[cols];
+	    	// 对其遍历
+	    	for(int i=0;i<rows;i++) {
+	    		for(int j=0;j<cols;j++) {
+	    			if(matrix[i][j]==0) {
+	    				row_arr[i] = true;
+	    				row_col[j] = true;
+	    			}
+	    		}
+	    	}
+	    	// 渲染
+	    	for(int i=0;i<rows;i++) {
+	    		for(int j=0;j<cols;j++) {
+	    			if(row_arr[i]||row_col[j]) {
+	    				matrix[i][j] = 0;
+	    			}
+	    		}
+	    	}
+    }
+}
+```
+
+### [5.面试题08.03魔术索引](https://leetcode-cn.com/problems/magic-index-lcci/)
+
+魔术索引。 在数组A[0...n-1]中，有所谓的魔术索引，满足条件A[i] = i。给定一个有序整数数组，编写一种方法找出魔术索引，若有的话，在数组A中找出一个魔术索引，如果没有，则返回-1。若有多个魔术索引，返回索引值最小的一个。
+
+示例1:
+
+ 输入：nums = [0, 2, 3, 4, 5]
+ 输出：0
+ 说明: 0下标的元素为0
+示例2:
+
+ 输入：nums = [1, 1, 1]
+ 输出：1
+
+> 解题思路：逻辑
+
+```java
+class Solution {
+    public int findMagicIndex(int[] nums) {
+        for(int i=0;i<nums.length;i++) {
+	    		if(i==nums[i]) {
+	    			return i;
+	    		}
+	    	}
+			return -1;
+    }
+}
+```
+
+### [6.面试题08.04幂集-解题思路dfs回溯](https://leetcode-cn.com/problems/power-set-lcci/)
+
+```java
+class Solution {
+		
+    	List<List<Integer>> res = new ArrayList<>();
+	    public List<List<Integer>> subsets(int[] nums) {
+	    	// 解题思路：dfs
+	    	// 结果
+	    	// 临时元素
+	    	List<Integer> list = new ArrayList<>();
+	    	
+	    	dfs(nums,0,list);
+	    	
+	    	return res;
+	    }
+	    // 开始
+	    public void dfs(int[] nums,int index,List<Integer> list) {
+	    	//添加结果
+	    	res.add(new ArrayList<>(list));
+	    	
+	    	//  备选
+	    	for(int i=index;i<nums.length;i++) {
+	    		list.add(nums[i]);
+	    		dfs(nums,i+1,list);
+	    		list.remove(list.size()-1);	    		
+	    	}
+	    	
+	    }
+	}
+```
+
+### [7.面试题10.01合并排序的数组](https://leetcode-cn.com/problems/sorted-merge-lcci/)
+
+给定两个排序后的数组 A 和 B，其中 A 的末端有足够的缓冲空间容纳 B。 编写一个方法，将 B 合并入 A 并排序。
+
+初始化 A 和 B 的元素数量分别为 m 和 n。
+
+示例:
+
+输入:
+A = [1,2,3,0,0,0], m = 3
+B = [2,5,6],       n = 3
+
+输出: [1,2,2,3,5,6]
+
+> 解题思路：从最大的开始排序
+
+```java
+class Solution {
+    public void merge(int[] A, int m, int[] B, int n) {
+        int start_A = m-1;
+	    	int start_B = n-1;
+	    	int index = m+n-1;
+	    	// 开始 
+	    	while(start_A>=0&&start_B>=0) {
+	    		if(A[start_A]>=B[start_B]) {
+	    			A[index] = A[start_A];
+	    			index--;
+	    			start_A--;
+	    		}else {
+	    			A[index] = B[start_B];
+	    			index--;
+	    			start_B--;
+	    		}
+	    	}
+	    	// 如果B还没走完
+	    	while(start_B>=0) {
+	    		A[index--] = B[start_B--];
+	    	}
+	    	
+    }
+}
+```
+
+### [8.面试题10.03搜索旋转数组](https://leetcode-cn.com/problems/search-rotate-array-lcci/)
+
+搜索旋转数组。给定一个排序后的数组，包含n个整数，但这个数组已被旋转过很多次了，次数不详。请编写代码找出数组中的某个元素，假设数组元素原先是按升序排列的。若有多个相同元素，返回索引值最小的一个。
+
+示例1:
+
+ 输入: arr = [15, 16, 19, 20, 25, 1, 3, 4, 5, 7, 10, 14], target = 5
+ 输出: 8（元素5在该数组中的索引）
+示例2:
+
+ 输入：arr = [15, 16, 19, 20, 25, 1, 3, 4, 5, 7, 10, 14], target = 11
+ 输出：-1 （没有找到）
+
+> 解题思路：边界问题，重点关注三个边界
+
+
+
+```java
+class Solution {
+    public int search(int[] arr, int target) {
+        int left = 0;
+        int right = arr.length-1;
+        while(left<=right){
+            // 求最小索引
+            if(arr[left]==target){
+                return left;
+            }
+            // 判断两次与target 一个是left一个mid
+            int mid = left + ((right-left)>>1);
+            // 中间值与target等了
+            if(arr[mid]==target){
+                right = mid;
+            }else if(arr[mid]>arr[left]){
+                // 左有序
+                if(arr[left]<=target&&target<arr[mid]){
+                    // 在左边
+                    right = mid-1;
+                }else{
+                    left = mid + 1;
+                }
+            }else if(arr[mid]<arr[left]){
+                // 右边有序
+                if(arr[mid]<target&&target<=arr[right]){
+                    left = mid + 1;
+                }else{
+                    right = mid-1;
+                }
+            }else{
+                // 当中间与左边相等
+                left = left + 1;
+            }
+
+        }
+        return -1;
+    }
+}
+```
+
+
+
+#### 二分总结
+
+#### [1.搜索插入位置](https://leetcode-cn.com/problems/search-insert-position/)
+
+给定一个排序数组和一个目标值，在数组中找到目标值，并返回其索引。如果目标值不存在于数组中，返回它将会被按顺序插入的位置。
+
+你可以假设数组中无重复元素。
+
+示例 1:
+
+输入: [1,3,5,6], 5
+输出: 2
+
+示例 2:
+
+输入: [1,3,5,6], 2
+输出: 1
+
+> 解题思路：标准的二分查找，无重复值
+
+```java
+class Solution {
+    public int searchInsert(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length-1;
+        while(left<=right){
+            int mid = left + ((right-left)>>1);
+            if(nums[mid]==target){
+                return mid;
+            }else if(nums[mid]>target){
+                right = mid - 1;
+            }else if(nums[mid]<target){
+                left = mid + 1;
+            }
+        }
+        return left;
+    }
+}
+```
+
+#### [2.在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
+
+给定一个按照升序排列的整数数组 nums，和一个目标值 target。找出给定目标值在数组中的开始位置和结束位置。
+
+如果数组中不存在目标值 target，返回 [-1, -1]。
+
+进阶：
+
+你可以设计并实现时间复杂度为 O(log n) 的算法解决此问题吗？
+
+
+示例 1：
+
+输入：nums = [5,7,7,8,8,10], target = 8
+输出：[3,4]
+
+> 解题思路：二分查找
+
+```java
+class Solution {
+    public int[] searchRange(int[] nums, int target) {
+        if(nums.length<1||nums==null){
+            return new int[]{-1,-1};
+        }
+        int left = leftSearch(nums,target);
+        int right = rightSearch(nums,target);
+        return new int[]{left,right};
+    }
+    // 左边
+    public int leftSearch(int[] nums,int target){
+        int left = 0;
+        int right = nums.length-1;
+        while(left<=right){
+            int mid = left + ((right-left)>>1);
+            if(nums[mid]>=target){
+                right = mid-1;
+            }else{
+                left  = mid + 1;
+            }
+        }
+        if(left>=nums.length || nums[left]!=target){
+            return -1;
+        }
+        return left;
+    }
+
+    // 右边
+    public int rightSearch(int[] nums,int target){
+        int left = 0;
+        int right = nums.length-1;
+        while(left<=right){
+            int mid = left + ((right-left)>>1);
+            if(nums[mid]<=target){
+                left = mid + 1;
+            }else{
+                right = mid -1;
+            }
+        }
+        if(right<0 || nums[right]!=target){
+            return -1;
+        }
+        return right;
+    }
+}
+```
+
+#### [3.旋转数组](https://leetcode-cn.com/problems/rotate-array/)
+
+给定一个数组，将数组中的元素向右移动 k 个位置，其中 k 是非负数。
+
+ 
+
+进阶：
+
+尽可能想出更多的解决方案，至少有三种不同的方法可以解决这个问题。
+你可以使用空间复杂度为 O(1) 的 原地 算法解决这个问题吗？
+
+> 先确定K的值，
+
+```java
+class Solution {
+    public void rotate(int[] nums, int k) {
+        
+        k = k % nums.length;
+        // 解题思路：同时旋转
+        reverse(nums,0,nums.length-1);
+        reverse(nums,0,k-1);
+        reverse(nums,k,nums.length-1);
+    }
+    // 翻转
+    public void reverse(int[] nums,int left,int right){
+        while(left<right){
+            int temp = nums[left];
+            nums[left] = nums[right];
+            nums[right] = temp;
+
+            left++;
+            right--;
+        }
+    }
+}
+```
+
+#### 4.[寻找旋转排序数组中的最小值](https://leetcode-cn.com/problems/find-minimum-in-rotated-sorted-array/)
+
+> 重点是其与右边界比较，且返回mid的值
+
+```java
+class Solution {
+    public int findMin(int[] nums) {
+        int left = 0;
+        int right = nums.length-1;
+        int mid = 0;
+        while(left<=right){
+           
+            mid = left + ((right-left)>>1);
+            // 与右边界比较
+            if(nums[mid]>=nums[right]){
+                left = mid +1;
+            }else{
+                right = mid;
+            }
+        }
+
+        return nums[mid];
+    }
+}
+```
+
+#### [5.寻找旋转排序数组中的最小值II](https://leetcode-cn.com/problems/find-minimum-in-rotated-sorted-array-ii/)
+
+假设按照升序排序的数组在预先未知的某个点上进行了旋转。
+
+( 例如，数组 [0,1,2,4,5,6,7] 可能变为 [4,5,6,7,0,1,2] )。
+
+请找出其中最小的元素。
+
+注意数组中可能存在重复的元素。
+
+示例 1：
+
+输入: [1,3,5]
+输出: 1
+示例 2：
+
+输入: [2,2,2,0,1]
+输出: 0
+
+> 与上述不同的是， 有重复的元素，所以相等的时候单独拎出来处理
+
+```java
+class Solution {
+    public int findMin(int[] nums) {
+        // 允许重复
+        int left = 0;
+        int right = nums.length-1;
+        int mid = 0;
+        while(left<=right){
+            mid = left + ((right-left)>>1);
+            if(nums[mid]>nums[right]){
+                // 左边有序
+                left = mid + 1;
+            }else if(nums[mid]<nums[right]){
+                right = mid;
+            }else if(nums[mid]==nums[right]){  
+                // 重复
+                right = right-1; 
+            }
+        }
+        return nums[mid];
+    }
+}
+```
+
+#### [6.搜索旋转排序数组](https://leetcode-cn.com/problems/search-in-rotated-sorted-array/)
+
+整数数组 nums 按升序排列，数组中的值 互不相同 。
+
+在传递给函数之前，nums 在预先未知的某个下标 k（0 <= k < nums.length）上进行了 旋转，使数组变为 [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]]（下标 从 0 开始 计数）。例如， [0,1,2,4,5,6,7] 在下标 3 处经旋转后可能变为 [4,5,6,7,0,1,2] 。
+
+给你 旋转后 的数组 nums 和一个整数 target ，如果 nums 中存在这个目标值 target ，则返回它的索引，否则返回 -1 。
+
+ 
+
+示例 1：
+
+输入：nums = [4,5,6,7,0,1,2], target = 0
+输出：4
+示例 2：
+
+输入：nums = [4,5,6,7,0,1,2], target = 3
+输出：-1
+
+> 在之前二分查找的基础上
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length-1;
+        while(left<=right){
+            int mid = left + ((right-left)>>1);
+            if(nums[mid]==target){
+                return mid;
+            }
+            // 判断哪边有序
+            if(nums[mid]>=nums[0]){
+                // 左边有序
+                //查找
+                if(nums[left]<=target&& target<nums[mid]){
+                    // 在左边
+                    right = mid - 1;
+                }else{
+                    // 在右边
+                    left = mid + 1;
+                }
+
+            }else{
+                // 右边有序
+                if(nums[mid]<target&&target<=nums[nums.length-1]){
+                    // 在右边
+                    left = mid + 1;
+                }else{
+                    // 在左边
+                    right = mid - 1;
+                }
+            }
+        }
+
+        return -1;
+    }
+}
+```
+
+#### [7.Leetcode搜索旋转排序数组II](https://leetcode-cn.com/problems/search-in-rotated-sorted-array-ii/)
+
+假设按照升序排序的数组在预先未知的某个点上进行了旋转。
+
+( 例如，数组 [0,0,1,2,2,5,6] 可能变为 [2,5,6,0,0,1,2] )。
+
+编写一个函数来判断给定的目标值是否存在于数组中。若存在返回 true，否则返回 false。
+
+示例 1:
+
+输入: nums = [2,5,6,0,0,1,2], target = 0
+输出: true
+示例 2:
+
+输入: nums = [2,5,6,0,0,1,2], target = 3
+输出: false
+
+> 包含重复元素。要注意mid的初始化位置
+
+```java
+class Solution {
+    public boolean search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length-1;
+        while(left<=right){
+            // 有重复元素
+            while(left<right&&nums[left]==nums[left+1]){
+                left++;
+            }
+            while(left<right&&nums[right]==nums[right-1]){
+                right--;
+            }
+            
+            int mid = left + ((right-left)>>1);
+
+            if(nums[mid]==target){
+                return true;
+            }
+            // 哪边有序
+            if(nums[mid]>=nums[0]){
+                // 左边有序
+                if(nums[left]<=target&&target<nums[mid]){
+                    // 在左边
+                    right = mid-1;
+                }else{
+                    left = mid+1;
+                }
+
+            }else{
+                // 右边有序
+                if(nums[mid]<target&&target<=nums[right]){
+                    // 在右边
+                    left = mid + 1;
+                }else{
+                    right = mid-1;
+                }
+
+            }
+
+        }
+        return false;
+    }
+}
+```
+
+
+
+
+
+### [9.面试题16.04井字游戏-考察读题逻辑](https://leetcode-cn.com/problems/tic-tac-toe-lcci/)
+
+设计一个算法，判断玩家是否赢了井字游戏。输入是一个 N x N 的数组棋盘，由字符" "，"X"和"O"组成，其中字符" "代表一个空位。
+
+以下是井字游戏的规则：
+
+玩家轮流将字符放入空位（" "）中。
+第一个玩家总是放字符"O"，且第二个玩家总是放字符"X"。
+"X"和"O"只允许放置在空位中，不允许对已放有字符的位置进行填充。
+当有N个相同（且非空）的字符填充任何行、列或对角线时，游戏结束，对应该字符的玩家获胜。
+当所有位置非空时，也算为游戏结束。
+如果游戏结束，玩家不允许再放置字符。
+如果游戏存在获胜者，就返回该游戏的获胜者使用的字符（"X"或"O"）；如果游戏以平局结束，则返回 "Draw"；如果仍会有行动（游戏未结束），则返回 "Pending"。
+
+示例 1：
+
+输入： board = ["O X"," XO","X O"]
+输出： "X"
+示例 2：
+
+输入： board = ["OOX","XXO","OXO"]
+输出： "Draw"
+解释： 没有玩家获胜且不存在空位
+
+> 解题思路：读题。其只是考察统计当前字符的横和纵。以及整个数组的对角线
+
+```java
+class Solution {
+	    public String tictactoe(String[] board) {
+	    	// 不需要放了，直接考察
+	    	// 统计空格  统计当前字符的上下两线，统计整个对角线
+	    	boolean flag = false;
+	    	int heng = 0;
+	    	int zong = 0;
+	    	int left = 0;
+	    	int right = 0;
+	    	// 对其遍历
+	    	for(int i=0;i<board.length;i++) {
+	    		heng = 0;
+	    		zong = 0;
+	    		for(int j=0;j<board.length;j++) {
+	    			if(board[i].charAt(j)==' ') {
+	    				flag = true;
+	    			}
+	    			// 统计当前字符的横和纵
+	    			heng = heng + (int)board[i].charAt(j);
+	    			zong = zong + (int)board[j].charAt(i);
+	    		}
+	    		// 检查横和纵
+	    		if(heng==(int)'X'*board.length || zong == (int)'X'*board.length) {
+	    			return "X";
+	    		}
+	    		if(heng==(int)'O'*board.length || zong== (int)'O'*board.length) {
+	    			return "O";
+	    		}
+	    		// 对角线
+	    		left = left + (int)board[i].charAt(i);
+	    		right = right + (int)board[i].charAt(board.length-i-1);
+	  
+	    	}
+	    	// 检查对角线
+	    	if(left==(int)'X'*board.length || right==(int)'X'*board.length) {
+	    		return "X";
+	    	}
+	    	
+	    	if(left==(int)'O'*board.length || right==(int)'O'*board.length) {
+	    		return "O";
+	    	}
+	    	
+	    	if(flag) {
+	    		return "Pending";
+	    	}else {
+	    		return "Draw";
+	    	}
+	    	
+	    }
+	}
+```
+
+### [10.面试题16.06最小差](https://leetcode-cn.com/problems/smallest-difference-lcci/)
+
+给定两个整数数组a和b，计算具有最小差绝对值的一对数值（每个数组中取一个值），并返回该对数值的差
+
+ 
+
+示例：
+
+输入：{1, 3, 15, 11, 2}, {23, 127, 235, 19, 8}
+输出：3，即数值对(11, 8)
+
+> 绝对值差，注意diff不一定在整型范围内。以及排序+双指针的策略。
+
+```java
+class Solution {
+    public int smallestDifference(int[] a, int[] b) {
+        // 解题思路：排序 + 双指针
+	    	Arrays.sort(a);
+	    	Arrays.sort(b);
+	    	// 最小值
+	    	int minValue = Integer.MAX_VALUE;
+	    	int left = 0;
+	    	int right = 0;
+	    	while(left<a.length&&right<b.length) {
+	    		long dif = a[left]-b[right];
+	    		minValue = (int)Math.min(Math.abs(dif), minValue);
+	    		// 判断
+	    		if(dif<0) {
+	    			left++;
+	    		}else {
+	    			right++;
+	    		}
+	    	}
+	    	return minValue;
+    }
+}
+```
+
+### [11.面试题16.10 生存人数](https://leetcode-cn.com/problems/living-people-lcci/)
+
+给定 N 个人的出生年份和死亡年份，第 i 个人的出生年份为 birth[i]，死亡年份为 death[i]，实现一个方法以计算生存人数最多的年份。
+
+你可以假设所有人都出生于 1900 年至 2000 年（含 1900 和 2000 ）之间。如果一个人在某一年的任意时期处于生存状态，那么他应该被纳入那一年的统计中。例如，生于 1908 年、死于 1909 年的人应当被列入 1908 年和 1909 年的计数。
+
+如果有多个年份生存人数相同且均为最大值，输出其中最小的年份。
+
+ 
+
+示例：
+
+输入：
+birth = {1900, 1901, 1950}
+death = {1948, 1951, 2000}
+输出： 1901
+
+> 解题思路：可以看成公交车的上站和下站的问题，上站对应+1，下站对应人数-1. 到时候用前缀和的思路，加起来即可，记录最大值即可。
+
+```java
+class Solution {
+    public int maxAliveYear(int[] birth, int[] death) {
+        //  从1990到2000年 一共101个数，但是当年死亡也是计数的，所以是第二年
+	    	int[] res = new int[102];
+	    	// 开始遍历
+	    	for(int i=0;i<birth.length;i++) {
+	    		// 上车
+	    		res[birth[i]-1900] += 1;
+	    		// 下车
+	    		res[death[i]-1900+1] -= 1;
+	    	}
+	    	// 统计数组
+	    	int temp = 0;
+	    	int result = 0;
+	    	// 记录索引
+	    	int index = 0;
+	    	for(int i=0;i<res.length;i++) {
+	    		// 前缀和
+	    		temp += res[i];
+	    		if(temp>result) {
+	    			result = temp;
+	    			index = i+1900;
+	    		}
+	    	}
+	    	return index;
+    }
+}
+```
+
+### [12.面试题16.15 珠玑妙算](https://leetcode-cn.com/problems/master-mind-lcci/)
+
+珠玑妙算游戏（the game of master mind）的玩法如下。
+
+计算机有4个槽，每个槽放一个球，颜色可能是红色（R）、黄色（Y）、绿色（G）或蓝色（B）。例如，计算机可能有RGGB 4种（槽1为红色，槽2、3为绿色，槽4为蓝色）。作为用户，你试图猜出颜色组合。打个比方，你可能会猜YRGB。要是猜对某个槽的颜色，则算一次“猜中”；要是只猜对颜色但槽位猜错了，则算一次“伪猜中”。注意，“猜中”不能算入“伪猜中”。
+
+给定一种颜色组合solution和一个猜测guess，编写一个方法，返回猜中和伪猜中的次数answer，其中answer[0]为猜中的次数，answer[1]为伪猜中的次数。
+
+示例：
+
+输入： solution="RGBY",guess="GGRR"
+输出： [1,1]
+解释： 猜中1次，伪猜中1次。
+
+> 解题思路：逻辑判断
+
+```java
+class Solution {
+    public int[] masterMind(String solution, String guess) {
+        // 统计桶1
+	    	int[] bucket_s = new int[4];
+	    	int[] bucket_g = new int[4];
+	    	// 计算相等的次数
+	    	int flag = 0;
+	    	// 开始遍历
+	    	int index = 0;
+	    	// 两个数组
+	    	char[] s_arr = solution.toCharArray();
+	    	char[] g_arr = guess.toCharArray();
+	    	// 对其遍历
+	    	for(int i=0;i<s_arr.length;i++) {
+	    		// 先查看是否相等
+	    		if(s_arr[i]==g_arr[i]) {
+	    			flag++;
+	    			continue;
+	    		}
+	    		// 不相等统计次数
+	    		if(s_arr[i]=='R') {
+	    			bucket_g[0]++;
+	    		}else if(s_arr[i]=='Y') {
+	    			bucket_g[1]++;
+	    		}else if(s_arr[i]=='G') {
+	    			bucket_g[2]++;
+	    		}else if(s_arr[i]=='B') {
+	    			bucket_g[3]++;
+	    		}
+	    		
+	    		if(g_arr[i]=='R') {
+	    			bucket_s[0]++;
+	    		}else if(g_arr[i]=='Y') {
+	    			bucket_s[1]++;
+	    		}else if(g_arr[i]=='G') {
+	    			bucket_s[2]++;
+	    		}else if(g_arr[i]=='B') {
+	    			bucket_s[3]++;
+	    		}
+	    		
+	    		
+	    	}
+	    	
+	    	// 统计伪猜中的
+	    	int fake_guess = 0;
+	    	for(int i=0;i<4;i++) {
+	    		fake_guess += Math.min(bucket_s[i], bucket_g[i]);
+	    	}
+	    	return new int[] {flag,fake_guess};
+    }
+}
+```
+
+### [13.面试题16.16 部分排序](https://leetcode-cn.com/problems/sub-sort-lcci/)
+
+给定一个整数数组，编写一个函数，找出索引m和n，只要将索引区间[m,n]的元素排好序，整个数组就是有序的。注意：n-m尽量最小，也就是说，找出符合条件的最短序列。函数返回值为[m,n]，若不存在这样的m和n（例如整个数组是有序的），请返回[-1,-1]。
+
+示例：
+
+输入： [1,2,4,7,10,11,7,12,6,7,16,18,19]
+输出： [3,9]
+提示：
+
+0 <= len(array) <= 1000000
+
+> 解题思路：排序，比较直接得出值
+
+```java
+class Solution {
+    public int[] subSort(int[] array) {
+        // 解题思路 排序
+	    	int[] clone = array.clone();
+	    	Arrays.sort(clone);
+	    	// 对其遍历
+	    	int left  = -1;
+	    	int right = -1;
+	    	for(int i=0;i<array.length;i++) {
+	    		if(array[i]!=clone[i]) {
+	    			if(left==-1) {
+	    				left = i;
+	    			}else {
+	    				right = i;
+	    			}
+	    		}
+	    		
+	    	}
+	    	return new int[] {left,right};
+    }
+}
+```
+
+> 解题思路：
+>
+> 从左到右找最大值，找不符合要求的最后right
+>
+>  从右到左找最小值，找不符合要求的最前面的left
+
+```java
+if(array.length<2) {
+	    		return new int[] {-1,-1};
+	    	}
+	    	
+	    	// 解题思路 遍历从左到右，找最右边的值
+	    	int left = -1;
+	    	int right = -1;
+	    	// 从左到右开始找
+	    	int max = array[0];
+	    	for(int i=1;i<array.length;i++) {
+	    		if(array[i]>=max) {
+	    			max = array[i];
+	    		}else {
+	    			right = i;
+	    		}
+	    			
+	    	}
+	    	// 从右到左开始找
+	    	int min = array[array.length-1];
+	    	for(int i=array.length-1;i>=0;i--) {
+	    		if(array[i]<=min) {
+	    			min = array[i];
+	    		}else {
+	    			left = i;
+	    		}
+	    	}
+	    	return new int[] {left,right};
+	    	
+```
+
+### [14.面试题16.17 连续数列](https://leetcode-cn.com/problems/contiguous-sequence-lcci/)
+
+
+给定一个整数数组，找出总和最大的连续数列，并返回总和。
+
+**示例：**
+
+```
+输入： [-2,1,-3,4,-1,2,1,-5,4]
+输出： 6
+解释： 连续子数组 [4,-1,2,1] 的和最大，为 6。
+```
+
+> 解题思路：对其用滑动窗口来解题
+
+```java
+class Solution {
+    public int maxSubArray(int[] nums) {
+        // 解题思路：用滑动窗口
+	    	int left = 0;
+	    	int right = 1;
+	    	// 临时值
+	    	int temp_sum = nums[0];
+	    	int res = nums[0];
+	    	int len = nums.length;
+	    	while(right<len) {
+	    		temp_sum += nums[right];
+	    		// 左窗口移动时机
+	    		while(nums[right]>temp_sum) {
+	    			temp_sum -= nums[left];
+	    			left++;
+	    		}
+	    		res = Math.max(res, temp_sum);
+	    		right++;
+	    		
+	    	}
+	    	return res;
+    }
+}
+```
+
+
+
+
+
+### [1.面试题17.22 单词转换-考察dfs(也可用图的思想来考虑)](https://leetcode-cn.com/problems/word-transformer-lcci/)
+
+给定字典中的两个词，长度相等。写一个方法，把一个词转换成另一个词， 但是一次只能改变一个字符。每一步得到的新词都必须能在字典中找到。
+
+编写一个程序，返回一个可能的转换序列。如有多个可能的转换序列，你可以返回任何一个。
+
+示例 1:
+
+输入:
+beginWord = "hit",
+endWord = "cog",
+wordList = ["hot","dot","dog","lot","log","cog"]
+
+输出:
+["hit","hot","dot","lot","log","cog"]
+
+```java
+class Solution {
+		// 结果
+		List<String> res = new ArrayList<>();
+		// 因为只需找到一个即可
+		boolean isFind = false;
+	    public List<String> findLadders(String beginWord, String endWord, List<String> wordList) {
+	    	// 判断
+	    	if(beginWord==null || endWord==null || beginWord.length()==0 || endWord.length()==0 || beginWord.length()!=endWord.length()) {
+	    		return res;
+	    	}
+	    	// 不包含结束词直接返回
+	    	if(!wordList.contains(endWord)) {
+	    		return res;
+	    	}
+	    	// 对其排序
+	    	wordList.sort((s1,s2)->s1.compareTo(s2));
+	    	// 判断是否访问过
+	    	int[] isVisited = new int[wordList.size()];
+	    	// 记录每一个
+	    	List<String> list = new ArrayList<>();
+	    	list.add(beginWord);
+	    	// 深度优先搜索
+	    	dfs(beginWord,endWord,isVisited,wordList,list);
+	    	return res;
+	    }
+	    // 深度优先搜索
+	    private void dfs(String beginWord,String endWord,int[] isVisited,List<String> wordList,List<String> list) {
+	    	if(isFind) {
+	    		return;
+	    	}
+	    	if(beginWord.equals(endWord)) {
+	    		res = new ArrayList<>(list);
+	    		isFind = true;
+	    		return;
+	    	}
+	    	for(int i=0;i<wordList.size();i++) {
+	    		if(isVisited[i]==1) {
+	    			continue;
+	    		}
+	    		// 如果可以转换就转换
+	    		String temp = wordList.get(i);
+	    		if(canChange(beginWord,temp)) {
+	    			isVisited[i] = 1;
+	    			list.add(temp);
+	    			dfs(temp,endWord,isVisited,wordList,list);
+	    			if(isFind) {
+	    				return;
+	    			}
+	    			list.remove(list.size()-1);
+	    		}
+	    	}
+	    }
+	 // 判断是否可以转换
+    	private boolean canChange(String s1,String s2) {
+    		if(s1.length()!=s2.length()) {
+    			return false;
+    		}
+    		// 记录可以转换的次数
+    		int count = 0;
+    		for(int i=0;i<s1.length();i++) {
+    			if(s1.charAt(i)!=s2.charAt(i)) {
+    				count++;
+    			}
+    			if(count>1) {
+    				return false;
+    			}
+    		}
+    		return count==1;
+    	}
+	}
+```
+
+
+
+## 剑指Offer
+
