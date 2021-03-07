@@ -9311,5 +9311,242 @@ class Solution {
 
 
 
+### [面试题-约瑟夫环问题]
+
+据说著名犹太历史学家 Josephus有过以下的故事：在罗马人占领乔塔帕特后，39 个犹太人与Josephus及他的朋友躲到一个洞中，39个犹太人决定宁愿死也不要被敌人抓到，于是决定了一个自杀方式，41个人排成一个圆圈，由第1个人开始报数，每报数到第3人该人就必须自杀，然后再由下一个重新报数，直到所有人都自杀身亡为止。然而Josephus 和他的朋友并不想遵从。首先从一个人开始，越过k-2个人（因为第一个人已经被越过），并杀掉第k个人。接着，再越过k-1个人，并杀掉第k个人。这个过程沿着圆圈一直进行，直到最终只剩下一个人留下，这个人就可以继续活着。问题是，给定了和，一开始要站在什么地方才能避免被处决？Josephus要他的朋友先假装遵从，他将朋友与自己安排在第16个与第31个位置，于是逃过了这场死亡游戏。
+
+
+
+
+
+```java
+public static int lastRemaining(int n, int m) {
+    if (n < 1 || m < 1) {
+        return -1;
+    }
+
+    List<Integer> list = new LinkedList<>();
+    for (int i = 0; i < n; i++) {
+        list.add(i);
+    }
+
+    // 要删除元素的位置
+    int idx = 0;
+    // 开始计数的位置
+    int start = 0;
+
+    while (list.size() > 1) {
+
+        // 只要移动m-1次就可以移动到下一个要删除的元素上
+        for (int i = 1; i < m; i++) {
+            idx = (idx + 1) % list.size(); // 【A】
+        }
+
+        list.remove(idx);
+
+        // 确保idx指向每一轮的第一个位置
+        // 下面的可以不用，【A】已经可以保证其正确性了，可以分析n=6，m=6的第一次删除情况
+    //  if (idx == list.size()) {
+    //      idx = 0;
+    //  }
+    }
+
+    return list.get(0);
+}
+```
+
+
+
 ## 剑指Offer
+
+
+
+## 栈的应用
+
+### 1.有效的括号
+
+**1.有效括号**
+
+![image-20201029134808642](E:/笔记/JAVA/Java复习框架-Java容器/imgs_vector/01/36.png)
+
+> 解题思路：
+>
+> - 1.遇见左括号，将左字符入栈
+>
+> - 2.遇见右括号
+>
+>   - 如果栈是空的，说明括号无效
+>   - 如果栈不为空，将栈顶字符出栈，与右字符匹配
+>     - 如果匹配不成功，则括号无效
+>     - 如果左右字符匹配，继续扫描下一个字符
+>
+> - 3.所有字符扫描完毕后
+>
+>   - 栈为空，说明括号无效
+>
+>   - 栈不为空，说明括号无效
+>
+>     
+
+```java
+class Solution {
+    public boolean isValid(String s) {
+        HashMap<Character,Character> hashMap = new HashMap<>();
+        hashMap.put('(',')');
+        hashMap.put('{','}');
+        hashMap.put('[',']');
+
+        Stack<Character> stack = new Stack<>();
+        for(int i=0;i<s.length();i++){
+            char ch = s.charAt(i);
+            if(hashMap.containsKey(ch)){
+                stack.push(ch);
+            }else{
+                if(stack.isEmpty()){
+                    return false;
+                }else{
+                    if(ch!=hashMap.get(stack.pop())){
+                        return false;
+                    }
+                }
+            }
+        }
+        return stack.isEmpty();
+    }
+}
+```
+
+
+
+## 队列的应用
+
+### 1.栈模拟队列
+
+两栈模拟队列：入栈即入栈；出栈不为空，则弹，为空则借
+
+> 解题思路：
+>
+> - 准备两个栈：inStack, outStack
+> - 入队时，push到inStack中
+> - 出队时，
+>   - 如果outStack为空，将inStack所有元素逐一弹出，push到outStack，outStack弹出栈顶元素
+>   - 如果outStack不为空，outStack弹出栈顶元素
+
+```java
+class MyQueue {
+
+    /** Initialize your data structure here. */
+	Stack<Integer> stack_first = null;
+	Stack<Integer> stack_second = null;
+	/**
+	 * 初始化队列
+	 */
+    public MyQueue() {
+    	stack_first = new Stack<Integer>();
+    	stack_second = new Stack<Integer>();
+    }
+    
+    /**
+            * 将元素x推到队列的末尾
+     */
+    /** Push element x to the back of queue. */
+    public void push(int x) {
+    	// 直接入栈1
+    	stack_first.push(x);    	
+    }
+    
+    /**
+            *  从队列的开头移除并返回元素
+     */
+    /** Removes the element from in front of queue and returns that element. */
+    public int pop() {
+    	// 判断栈2
+    	if(stack_second.isEmpty()) {
+    		// 栈2为空的话
+    		// 先将栈1都弹出来
+    		while(!stack_first.isEmpty()) {
+    			stack_second.push(stack_first.pop());
+    		}
+    		return stack_second.pop();
+    		
+    	}else {
+    		// 栈2不为空的话
+    		return stack_second.pop();
+    	}
+    	
+    }
+    
+    /**
+           *  返回队列开头的元素
+     */
+    /** Get the front element. */
+    public int peek() {
+    	if(stack_second.isEmpty()) {
+    		while(!stack_first.isEmpty()) {
+    			stack_second.push(stack_first.pop());
+    		}
+    		return stack_second.peek();
+    	}else {
+    		return stack_second.peek();
+    	}
+    }
+    
+    /**
+           *  判断队列是否为空
+     */
+    /** Returns whether the queue is empty. */
+    public boolean empty() {
+    	return stack_first.isEmpty()&&stack_second.isEmpty();
+    }
+}
+
+```
+
+### 2.队列模拟栈
+
+队列模拟栈，入队列，直接借，之后交换。  直接出
+
+> 实现思路:
+>
+> - 准备两个队列用于实现栈 一个queue_in 一个queue_out
+>   - 入栈的话 queue_in接收元素 并将queue_out中的元素全部排出并接收 之后queue_in 和queue_out互换
+>   - 出栈的话 queue_out出队列即可
+
+```java
+class MyStack {
+    Queue<Integer> queue_in;
+    Queue<Integer> queue_out;
+    /** Initialize your data structure here. */
+    public MyStack() {
+        queue_in = new LinkedList<>();
+        queue_out = new LinkedList<>();
+    }
+    
+    /** Push element x onto stack. */
+    public void push(int x) {
+        queue_in.offer(x);
+        while(!queue_out.isEmpty()){
+            queue_in.offer(queue_out.poll());
+        }
+        Queue temp_queue = queue_in;
+        queue_in = queue_out;
+        queue_out = temp_queue;
+    }
+    
+    /** Removes the element on top of the stack and returns that element. */
+    public int pop() {
+        return queue_out.poll();
+    }
+    
+    /** Get the top element. */
+    public int top() {
+        return queue_out.peek();
+    }
+    
+    /** Returns whether the stack is empty. */
+    public boolean empty() {
+        return queue_out.isEmpty();
+    }
+}
+```
 
