@@ -6850,7 +6850,7 @@ class Solution {
 	    			return false;
 	    		}
 	    	}
-	    	// 判断当前坐标的左上角对角线
+	    	// 判断当前坐标的右上角对角线
 	    	for(int i=row-1,j=col+1;i>=0&&j<chess[0].length;i--,j++) {
 	    		if(chess[i][j]=='Q') {
 	    			return false;
