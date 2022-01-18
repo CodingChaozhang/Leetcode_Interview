@@ -78,26 +78,44 @@ class Solution {
  * }
  */
 class Solution {
-    public ListNode reverseBetween(ListNode head, int m, int n) {
-        // 哑结点
-	    	ListNode dummy = new ListNode(-1,head);
-	    	ListNode superior = dummy;
-	    	for(int i=1;i<m;i++) {
-	    		superior = superior.next;
-	    	}
-	    	ListNode cur = superior.next;
-	    	ListNode prev = null;
-	    	// 开始转换
-	    	for(int i=m;i<=n;i++) {
-	    		ListNode next = cur.next;
-	    		cur.next = prev;
-	    		prev = cur;
-	    		cur = next;
-	    	}
-	    	// 更改m和m-n结点
-	    	superior.next.next = cur;
-	    	superior.next = prev;
-	    	return dummy.next;
+    public ListNode reverseBetween(ListNode head, int left, int right) {
+        ListNode dummy = new ListNode(-1,head);
+        ListNode l = dummy;
+        // 记录原先的出现位置
+        ListNode pre = dummy;
+        ListNode next = dummy;
+        // 记录目前链表的头和尾巴位置
+        ListNode start = dummy;
+        ListNode tail  = dummy;
+        for(int i=1;i<left;i++){
+            l = l.next;
+        }
+        pre = l;
+        start = l.next;
+        for(int i=left;i<=right;i++){
+            l = l.next;
+        }
+        tail = l;
+        next = l.next;
+        // 反转链表
+        ListNode newHead = reverse(start,next);
+        // 连接
+        pre.next = newHead;
+        start.next = next;
+        
+        return dummy.next;
+    }
+
+    public ListNode reverse(ListNode head,ListNode tail){
+        ListNode pre = null;
+        ListNode next = null;
+        while(head!=tail){
+            next = head.next;
+            head.next = pre;
+            pre = head;
+            head = next;
+        }
+        return pre;
     }
 }
 ```
@@ -284,21 +302,18 @@ class Solution {
  * }
  */
 public class Solution {
+    // 判断链表是否有环
     public boolean hasCycle(ListNode head) {
-        if(head==null||head.next==null) {
-	    		return false;
-	    	}	    		
-	    	ListNode fast = head;
-	    	ListNode low = head;
-	    	while(fast.next!=null&&fast.next.next!=null) {
-	    		fast = fast.next.next;
-	    		low = low.next;
-		    	// 对其判断
-	    		if(low==fast) {
-	    			return true;
-	    		}
-	    	}
-	    	return false;
+        ListNode slow = head;
+        ListNode fast = head;
+        while(fast!=null&&fast.next!=null){
+            slow = slow.next;
+            fast = fast.next.next;
+            if(slow==fast){
+                return true;
+            }
+        }
+        return false;
     }
 }
 ```
@@ -333,40 +348,49 @@ public class Solution {
  * }
  */
 class Solution {
+    // 回文链表O(n)和O(1)的时间复杂度
     public boolean isPalindrome(ListNode head) {
-
-        if(head==null || head.next == null) {
-	    		return true;
-	    	}
-        // 双指针来判断
-	    	ListNode fast = head;
-	    	ListNode low  = head;
-	    	while(fast.next!=null&&fast.next.next!=null) {
-	    		low = low.next;
-	    		fast = fast.next.next;
-	    	}
-	    	
-	    	// 分成两个链表
-	    	fast = low.next;
-	    	low.next = null;
-	    	// 将后面那个链表反转
-	    	ListNode pre = null;
-	    	ListNode next = null;
-	    	while(fast!=null) {
-	    		next = fast.next;
-	    		fast.next = pre;
-	    		pre = fast;
-	    		fast = next;
-	    	}
-	    	// 其头结点改为pre 另外一个头结点为head
-	    	while(head!=null&&pre!=null) {
-	    		if(pre.val!=head.val) {
-	    			return false;
-	    		}
-	    		pre = pre.next;
-	    		head = head.next;
-	    	}
-	    	return true;
+        if(head==null || head.next==null){
+            return true;
+        }
+        // 1.找到中间的结点
+        ListNode mid = findMedium(head);
+        // 2.找到下一段的开始
+        ListNode next = mid.next;
+        mid.next = null;
+        // 翻转链表
+        ListNode newHead = reverse(next);
+        // 从头开始比较
+        while(head!=null&&newHead!=null){
+            if(head.val!=newHead.val){
+                return false;
+            }
+            head = head.next;
+            newHead = newHead.next;
+        }
+        return true;
+    }
+    // 中间的结点
+    public ListNode findMedium(ListNode head){
+        ListNode slow = head;
+        ListNode fast = head;
+        while(fast.next!=null&&fast.next.next!=null){
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;
+    }
+    // 翻转链表
+    public ListNode reverse(ListNode head){
+        ListNode pre = null;
+        ListNode next = null;
+        while(head!=null){
+            next = head.next;
+            head.next = pre;
+            pre = head;
+            head = next;
+        }
+        return pre;
     }
 }
 ```
@@ -403,47 +427,37 @@ k 是一个正整数，它的值小于或等于链表的长度。
  * }
  */
 class Solution {
-     // 多个k组合并成一个，一个成多个
-		public ListNode reverseKGroup(ListNode head, int k) {
-	    	ListNode dummy = new ListNode(-1,head);
-	    	ListNode pre = dummy;
-	    	ListNode tail = dummy;
-	    	// 对其遍历
-	    	while(head!=null) {
-	    		for(int i=0;i<k;i++) {
-	    			tail = tail.next;
-	    			if(tail==null) {
-	    				return dummy.next;
-	    			}
-	    		}
-	    		ListNode start = pre.next;
-	    		ListNode end = tail.next;
-	    		tail.next = null;
-	    		// 翻转
-	    		pre.next = myReverse(start);
-	    		// 重新开始
-	    		start.next = end;
-	    		pre = start;
-	    		tail = pre;
-	    		
-	    	}
-	    	
-	    	return dummy.next;
-	    }
-		
-		// 翻转
-		public ListNode myReverse(ListNode head) {
-			ListNode pre = null;
-			ListNode next = null;
-			while(head!=null) {
-				next = head.next;
-				head.next = pre;
-				pre = head;
-				head = next;
-			}
-			return pre;
-					
-		}
+    // 翻转链表
+    public ListNode reverseKGroup(ListNode head, int k) {
+        if(head==null){
+            return head;
+        }
+        // 记录
+        ListNode a = head;
+        ListNode b = head;
+        for(int i=0;i<k;i++){
+            if(b==null){
+                return head;
+            }
+            b = b.next;
+        }
+        ListNode newHead = reverse(a,b);
+        // 连接上
+        a.next = reverseKGroup(b,k);
+        return newHead;
+    }
+
+    public ListNode reverse(ListNode head,ListNode tail){
+        ListNode pre = null;
+        ListNode next = null;
+        while(head!=tail){
+            next = head.next;
+            head.next = pre;
+            pre = head;
+            head = next;
+        }
+        return pre;
+    }
 }
 ```
 
@@ -561,52 +575,37 @@ public class Solution {
 > 解题思路：双指针走
 
 ```java
-package com.lcz.leetcode;
-
-public class Leetcode0142 {
-	class ListNode{
-		int val;
-		ListNode next;
-		ListNode(int val){
-			this.val = val;
-			next = null;
-		}
-	}
-	public class Solution {
-	    // 双指针
-		public ListNode detectCycle(ListNode head) {
-			if(head==null||head.next==null) {
-				return null;
-			}
-	        ListNode low = head;
-	        ListNode fast = head;
-	        // 是否有环形
-	        boolean isCycle = false;
-	        // 双指针走
-	        while(fast.next!=null&&fast.next.next!=null) {
-	        	fast = fast.next.next;
-	        	low  = low.next;
-	        	if(low==fast) {
-	        		isCycle = true;
-	        		break;
-	        	}
-	        }
-	        // 如果有环形
-	        if(isCycle) {
-	        	fast = head;
-	        	while(fast!=low) {
-	        		low = low.next;
-	        		fast = fast.next;
-	        	}
-	        	return low;
-	        	
-	        }else {
-	        	return null;
-	        }
-	    }
-	}
+/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+public class Solution {
+    // 环形链表II
+    public ListNode detectCycle(ListNode head) {
+        ListNode slow = head;
+        ListNode fast = head;
+        while(fast!=null&&fast.next!=null){
+            slow = slow.next;
+            fast = fast.next.next;
+            if(slow==fast){
+                fast = head;
+                while(fast!=slow){
+                    fast = fast.next;
+                    slow = slow.next;
+                }
+                return slow;
+            }
+        }
+        return null;
+    }
 }
-
 ```
 
 ### [9.Leetcode083删除排序链表中的重复元素](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list/)
@@ -637,24 +636,20 @@ public class Leetcode0142 {
  */
 class Solution {
     public ListNode deleteDuplicates(ListNode head) {
-        if(head==null || head.next == null) {
-	    		return head;
-	    	}
-	    	ListNode slow = head;
-	    	ListNode fast = head;
-	    	while(fast!=null) {
-	    		// 重复的话就一直走
-	    		while(fast!=null&&slow.val == fast.val) {
-	    			fast = fast.next;
-	    		}
-	    		// 不重复了
-	    		slow.next = fast;
-	    		slow = fast;
-                if(fast!=null){
-	    		    fast = fast.next;
-                }
-	    	}
-	    	return head;
+        // 删除链表中的重复元素，不是连根去除，不需要哑结点
+        ListNode cur = head;
+        while(cur!=null&&cur.next!=null){
+            //判断是否相等
+            if(cur.val==cur.next.val){
+                cur.next = cur.next.next;
+            }else{
+                // 不相等
+                cur = cur.next;
+            }
+
+        }
+
+        return head;
     }
 }
 ```
@@ -685,28 +680,26 @@ class Solution {
  * }
  */
 class Solution {
+    // 删除排序链表中的所有重复元素。连根拔除
     public ListNode deleteDuplicates(ListNode head) {
-       //哑结点
-	    	ListNode dummy = new ListNode(-1,head);
-	    	// 快慢指针解题
-	    	ListNode slow = dummy;
-	    	ListNode fast = head;
-	    	while(fast!=null) {
-	    		// 重复元素了
-	    		if(fast.next!=null&&fast.val==fast.next.val) {
-	    			// 就一直走
-	    			while(fast.next!=null&&fast.val==fast.next.val) {
-	    				fast = fast.next;
-	    			}
-	    			fast = fast.next;
-	    			slow.next = fast;
-	    		}else {
-	    			// 没有重复元素
-	    			slow = slow.next;
-	    			fast = fast.next;
-	    		}
-	    	}
-	    	return dummy.next;
+        ListNode dummy = new ListNode(-1,head);
+        ListNode cur = dummy;
+        while(cur.next!=null&&cur.next.next!=null){
+            //判断
+            if(cur.next.val==cur.next.next.val){
+                int x = cur.next.val;
+                // 去除所有的
+                while(cur.next!=null&&cur.next.val==x){
+                    cur.next = cur.next.next;
+                }
+            }else{
+                cur = cur.next;
+            }
+
+
+        }
+
+        return dummy.next;
     }
 }
 ```
@@ -741,23 +734,24 @@ class Solution {
  */
 class Solution {
     public ListNode oddEvenList(ListNode head) {
-         if(head==null || head.next == null) {
-	        	return head;
-	        }
-	        // 奇数的指针
-	        ListNode p1 = head;
-	        // 偶数链表以及偶数链表的指针
-	        ListNode head2 = head.next;
-	        ListNode p2 = head2;
-	        // 遍历
-	        while(p1.next!=null&&p2.next!=null) {
-	        	p1.next = p2.next;
-	        	p1 = p1.next;
-	        	p2.next = p1.next;
-	        	p2 = p2.next;
-	        }
-	        p1.next = head2;
-	        return head;
+        // 判断
+        if(head==null || head.next==null){
+            return head;
+        }
+        // 开始记录
+        ListNode l1 = head;
+        ListNode l2 = head.next;
+        ListNode l2_head = head.next;
+        // 开始走
+        while(l1.next!=null&&l2.next!=null){
+            l1.next = l2.next;
+            l1 = l1.next;
+            l2.next = l1.next;
+            l2 = l2.next;
+        }
+        // 重新连接
+        l1.next = l2_head;
+        return head;
     }
 }
 ```
@@ -790,26 +784,27 @@ class Solution {
  */
 class Solution {
     public ListNode partition(ListNode head, int x) {
-            ListNode smallHead = new ListNode(-1);
-	    	ListNode small = smallHead;
-	    	ListNode bigHead   = new ListNode(-1);
-	    	ListNode big = bigHead;
-	    	// 开始遍历
-	    	while(head!=null) {
-	    		// 判断
-	    		if(head.val<x) {
-	    			small.next = head;
-	    			small = small.next;
-	    		}else {
-	    			big.next = head;
-	    			big = big.next;
-	    		}
-	    		head = head.next;
-	    	}
-	    	big.next = null;
-	    	small.next = bigHead.next;
-	    	head = smallHead.next;
-	    	return head;
+        ListNode small = new ListNode(-1,head);
+        ListNode smallHead = small;
+        ListNode big   = new ListNode(-1,head);
+        ListNode bigHead = big;
+        while(head!=null){
+            if(head.val<x){
+                small.next = head;
+                small = small.next;
+            }else{
+                big.next = head;
+                big = big.next;
+            }
+            head = head.next;
+        }
+        // 加个null
+        big.next = null;
+        // 合并
+        ListNode dummy = new ListNode(-1,smallHead.next);
+        small.next = bigHead.next;
+
+        return dummy.next;
     }
 }
 ```
@@ -853,28 +848,26 @@ class Solution {
  */
 class Solution {
     public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
-            // 新链表
-	    	ListNode dummy = new ListNode(-1);
-	    	ListNode head = dummy;
-	    	// 开始走
-	    	while(l1!=null&&l2!=null) {
-	    		if(l1.val<l2.val) {
-	    			head.next = l1;
-		    		l1 = l1.next;
-	    		}else {
-	    			head.next = l2;
-		    		l2 = l2.next;
-	    		}
-	    		head = head.next;
-	    	}
-	    	// 如果还有剩余
-	    	if(l1!=null) {
-	    		head.next = l1;
-	    	}
-	    	if(l2!=null) {
-	    		head.next = l2;
-	    	}
-	    	return dummy.next;
+        ListNode dummy = new ListNode(-1);
+        ListNode l = dummy;
+        while(l1!=null&&l2!=null){
+            if(l1.val>l2.val){
+                l.next = l2;
+                l = l.next;
+                l2 = l2.next;
+            }else{
+                l.next = l1;
+                l = l.next;
+                l1 = l1.next;
+            }
+        }
+        if(l1!=null){
+            l.next = l1;
+        }
+        if(l2!=null){
+            l.next = l2;
+        }
+        return dummy.next;
     }
 }
 ```
@@ -905,26 +898,34 @@ class Solution {
 > 解题思路：删除结点的时候增加一个哑结点，并且用快慢指针的思路，从哪里开始，到哪里结束
 
 ```java
-// 删除链表的倒数第N个结点
-	    public ListNode removeNthFromEnd(ListNode head, int n) {
-	    	// 删除结点用哑结点
-	    	ListNode dummy = new ListNode(0,head);
-	    	// 解法用快慢指针
-	    	ListNode slow = dummy;
-	    	ListNode fast = dummy;
-	    	// 开始走n步
-	    	for(int i=0;i<n;i++) {
-	    		fast = fast.next;
-	    	}
-	    	// 一起走
-	    	while(fast.next!=null) {
-	    		fast = fast.next;
-	    		slow = slow.next;
-	    	}
-	    	// 删除
-	    	slow.next = slow.next.next;
-	    	return dummy.next;
-	    }
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode removeNthFromEnd(ListNode head, int n) {
+        //哑结点
+        ListNode dummy = new ListNode(-1,head);
+        ListNode slow = dummy;
+        ListNode fast = dummy;
+        // 开始走
+        for(int i=1;i<=n;i++){
+            fast = fast.next;
+        }
+        while(fast.next!=null){
+            slow = slow.next;
+            fast = fast.next;
+        }
+        slow.next = slow.next.next;
+        return dummy.next;
+    }
+}
 ```
 
 ### [3.Leetcode024两两交换链表中的结点](https://leetcode-cn.com/problems/swap-nodes-in-pairs/)
@@ -966,23 +967,34 @@ class Solution {
 
 
 ```java
-// 迭代方法
-	    public ListNode swapPairs_2(ListNode head) {
-	    	 ListNode dummy = new ListNode(-1,head);
-		    	ListNode newHead = dummy;
-		    	// 开始遍历
-		    	while(newHead.next!=null&&newHead.next.next!=null) {
-		    		ListNode node1 = newHead.next;
-		    		ListNode node2 = newHead.next.next;
-		    		// 交换
-		    		newHead.next = node2;
-		    		node1.next = node2.next;
-		    		node2.next = node1;
-		    		// 移动
-		    		newHead = node1;
-		    	}	    	
-		    	return dummy.next;
-	    }
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    // 两两交换链表中的节点
+    public ListNode swapPairs(ListNode head) {
+        ListNode dummy = new ListNode(-1,head);
+        ListNode l = dummy;
+        // 开始走
+        while(l.next!=null&&l.next.next!=null){
+            ListNode first = l.next;
+            ListNode second = l.next.next;
+            // 交换
+            first.next = second.next;
+            second.next = first;
+            l.next = second;
+            l = first;
+        }
+        return dummy.next;
+    }
+}
 ```
 
 ### [4.Leetcode_Offer_18 删除链表的节点](https://leetcode-cn.com/problems/shan-chu-lian-biao-de-jie-dian-lcof/)
@@ -1008,40 +1020,28 @@ class Solution {
 > 解题思路：添加一个哑结点，增加一个前置节点即可。
 
 ```java
-package com.lcz.leetcode;
-// 删除链表的结点
-public class Leetcode_Offer_18 {
-	// 结点
-	class ListNode{
-		int val;
-		ListNode next;
-		ListNode(int val){
-			this.val = val;
-		}
-		
-	}
-	class Solution {
-	    public ListNode deleteNode(ListNode head, int val) {
-	    	// 开一个哑结点
-	    	ListNode dummy = new ListNode(-1);
-	    	dummy.next = head;
-	    	ListNode prev = dummy;
-	    	ListNode cur = head;
-	    	while(cur!=null) {
-	    		// 看是否
-	    		if(cur.val == val) {
-	    			prev.next = cur.next;
-	    			break;
-	    		}
-	    		// 不相等
-	    		prev = cur;
-	    		cur = cur.next;
-	    	}
-	    	return dummy.next;
-	    }
-	}
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) { val = x; }
+ * }
+ */
+class Solution {
+    public ListNode deleteNode(ListNode head, int val) {
+        ListNode dummy = new ListNode(-1,head);
+        ListNode cur = dummy;
+        while(cur.next!=null){
+            if(cur.next.val==val){
+                cur.next = cur.next.next;
+            }else{
+                cur = cur.next;
+            }
+        }
+        return dummy.next;
+    }
 }
-
 ```
 
 ### [5.Leetcode203移除链表元素](https://leetcode-cn.com/problems/remove-linked-list-elements/)
@@ -1068,25 +1068,19 @@ public class Leetcode_Offer_18 {
  * }
  */
 class Solution {
+    // 移除链表元素
     public ListNode removeElements(ListNode head, int val) {
-        // 哑结点
-	    	ListNode dummy = new ListNode(-1,head);
-	    	ListNode prev = dummy;
-	    	ListNode cur = head;
-	    	while(cur!=null) {
-	    		// 相等
-	    		if(cur.val==val) {
-	    			// 相等的话
-	    			prev.next = cur.next;
-	    			cur = cur.next;
-	    		}else {
-	    			prev.next = cur;
-	    			cur = cur.next;
-	    			prev = prev.next;
-	    		}
-	    		
-	    	}
-	    	return dummy.next;
+        ListNode dummy = new ListNode(-1,head);
+        ListNode cur = dummy;
+        while(cur.next!=null){
+            // 判断
+            if(cur.next.val==val){
+                cur.next = cur.next.next;
+            }else{
+                cur = cur.next;
+            }
+        }
+        return dummy.next;
     }
 }
 ```
@@ -1119,51 +1113,44 @@ class Solution {
 > 优先级队列来辅助解题
 
 ```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
 class Solution {
-		
-		// 对链表做一个封装
-		class Status implements Comparable<Status>{
-			ListNode node;
-			int val;
-			Status(ListNode node,int val){
-				this.node = node;
-				this.val = val;
-			}
-			public int compareTo(Status s2) {
-				return this.val - s2.val;
-			}
-		}
-		
-	    public ListNode mergeKLists(ListNode[] lists) {
-	    	// 开始合并
-	    	ListNode dummy = new ListNode(-1);
-	    	ListNode head  = dummy;
-	    	// 优先级队列
-	    	PriorityQueue<Status> queue = new PriorityQueue<Status>();
-	    	// 先存放
-	    	for(int i=0;i<lists.length;i++) {
-	    		if(lists[i]!=null) {
-	    			queue.offer(new Status(lists[i],lists[i].val));
-	    		}
-	    	}
-	    	// 开始取
-	    	while(!queue.isEmpty()) {
-	    		Status status = queue.poll();
-	    		ListNode node = status.node;
-	    		
-	    		// 合并
-	    		head.next = node;
-	    		head = head.next;
-	    		// 看是否还有点
-	    		if(node.next!=null) {
-	    			queue.offer(new Status(node.next,node.next.val));
-	    		}
-	    		
-	    	}
-	    	
-	    	return dummy.next;
-	    }
-	}
+    // 合并K个升序链表
+    public ListNode mergeKLists(ListNode[] lists) {
+        // 比较次序没定
+        PriorityQueue<ListNode> queue = new PriorityQueue<>((a,b)->(a.val-b.val));
+        // 先加入进来
+       for(int i=0;i<lists.length;i++){
+           if(lists[i]!=null){
+               queue.offer(lists[i]);
+           }
+       }
+        // 新链表
+        ListNode dummy = new ListNode(-1);
+        ListNode l = dummy;
+        //开始
+        while(!queue.isEmpty()){
+            ListNode node = queue.poll();
+            // 添加进来
+            l.next = node;
+            l = l.next;
+            // 添加该结点的结点
+            if(node.next!=null){
+                queue.offer(node.next);
+            }
+        }
+        return dummy.next;
+    }
+}
 ```
 
 ## 逻辑解题
@@ -1203,27 +1190,29 @@ class Solution {
  * }
  */
 class Solution {
+    // 三步走战略
     public ListNode rotateRight(ListNode head, int k) {
-        if(head==null || head.next == null) {
-	    		return head;
-	    	}
-	    	// 1.使其变为环形链表
-	    	ListNode tail = head;
-	    	int len = 1;
-	    	while(tail.next!=null) {
-	    		len++;
-	    		tail = tail.next;
-	    	}
-	    	tail.next = head;
-	    	// 2.到尾结点这里
-	    	k = k % len;
-	    	for(int i=0;i<len-k;i++) {
-	    		tail = tail.next;
-	    	}
-	    	//3.找到头结点
-	    	head = tail.next;
-	    	tail.next = null;
-	    	return head;
+        if(head==null){
+            return head;
+        }
+        // 1.先将其连成一个环
+        ListNode tail = head;
+        int len = 1;
+        while(tail.next!=null){
+            tail = tail.next;
+            len++;
+        }
+        tail.next = head;
+        // 2.计算新的k
+        k = k % len;
+        // 3.找到头和尾
+        tail = head;
+        for(int i=1;i<len-k;i++){
+            tail = tail.next;
+        }
+        head = tail.next;
+        tail.next = null;
+        return head;
     }
 }
 ```
@@ -1263,8 +1252,9 @@ class Solution {
  */
 class Solution {
     public void deleteNode(ListNode node) {
-         node.val = node.next.val;
-	        node.next = node.next.next;
+        // 后一个覆盖前一个
+        node.val = node.next.val;
+        node.next = node.next.next;
     }
 }
 ```
@@ -1295,83 +1285,95 @@ linkedList.get(1);            //返回3
 > 解题思路：最重要的是给了其一个size
 
 ```java
-	// 单链表
-	class ListNode{
-		int val;
-		ListNode next;
-		public ListNode() {
-			
-		}
-		public ListNode(int val) {
-			this.val = val;
-		}
-	}
-	class MyLinkedList {
-		// 遍历
-		ListNode head;
-		int size;
-	    /** Initialize your data structure here. */
-	    public MyLinkedList() {
-	    	head = new ListNode(-1);
-	    	size = 0;
-	    }
-	    
-	    /** Get the value of the index-th node in the linked list. If the index is invalid, return -1. */
-	    public int get(int index) {
-	    	if(index<0||index>=size) {
-	    		return -1;
-	    	}
-	    	ListNode cur = head.next;
-	    	for(int i=0;i<index;i++) {
-	    		cur = cur.next;
-	    	}
-	    	return cur.val;
-	    }
-	    
-	    /** Add a node of value val before the first element of the linked list. After the insertion, the new node will be the first node of the linked list. */
-	    public void addAtHead(int val) {
-	    	addAtIndex(0,val);
-	    }
-	    
-	    /** Append a node of value val to the last element of the linked list. */
-	    public void addAtTail(int val) {
-	    	addAtIndex(size,val);
-	    }
-	    // 添加
-	    /** Add a node of value val before the index-th node in the linked list. If index equals to the length of linked list, the node will be appended to the end of linked list. If index is greater than the length, the node will not be inserted. */
-	    public void addAtIndex(int index, int val) {
-	    	
-	    	if(index>size) {
-	    		return;
-	    	}
-	    	if(index<0) {
-	    		index = 0;
-	    	}
-	    	ListNode prev = head;
-	    	for(int i=0;i<index;i++) {
-	    		prev = prev.next;
-	    	}
-	    	ListNode cur = new ListNode(val);
-	    	cur.next = prev.next;
-	    	prev.next = cur;
-	    	size++;
-	    }
-	    
-	    /** Delete the index-th node in the linked list, if the index is valid. */
-	    public void deleteAtIndex(int index) {
-	    	if(index<0 || index>=size) {
-	    		return;
-	    	}
-	    	ListNode prev = head;
-	    	for(int i=0;i<index;i++) {
-	    		prev = prev.next;
-	    	}
-	    	prev.next = prev.next.next;
-	    	
-	    	size--;
-	    }
-	}
+// 链表结点
+class ListNode{
+    int val;
+    ListNode next;
+    public ListNode(){
 
+    }
+    public ListNode(int val){
+        this.val = val;
+        this.next = null;
+    }
+    public ListNode(int val,ListNode next){
+        this.val = val;
+        this.next = next;
+    }
+}
+class MyLinkedList {
+    ListNode head;
+    int size;
+    /** Initialize your data structure here. */
+    public MyLinkedList() {
+        head = new ListNode(-1);
+        size  = 0;
+    }
+    
+    /** Get the value of the index-th node in the linked list. If the index is invalid, return -1. */
+    public int get(int index) {
+        if(index<0 || index>=size){
+            return -1;
+        }
+        ListNode cur = head.next;
+        for(int i=0;i<index;i++){
+            cur = cur.next;
+        }
+        return cur.val;
+    }
+    
+    /** Add a node of value val before the first element of the linked list. After the insertion, the new node will be the first node of the linked list. */
+    public void addAtHead(int val) {
+        addAtIndex(0,val);
+    }
+    
+    /** Append a node of value val to the last element of the linked list. */
+    public void addAtTail(int val) {
+        addAtIndex(size,val);
+    }
+    
+    /** Add a node of value val before the index-th node in the linked list. If index equals to the length of linked list, the node will be appended to the end of linked list. If index is greater than the length, the node will not be inserted. */
+    public void addAtIndex(int index, int val) {
+        if(index>size){
+            return;
+        }
+        if(index<0){
+            index = 0;
+        }
+        ListNode prev = head;
+        for(int i=0;i<index;i++){
+            prev = prev.next;
+        }
+        // 创建新节点
+        ListNode cur = new ListNode(val);
+        cur.next = prev.next;
+        prev.next = cur;
+        size++;
+    }
+    
+    /** Delete the index-th node in the linked list, if the index is valid. */
+    public void deleteAtIndex(int index) {
+        if(index<0 || index>=size){
+            return;
+        }
+        ListNode prev = head;
+        for(int i=0;i<index;i++){
+            prev = prev.next;
+        }
+        prev.next = prev.next.next;
+        size--;
+    }
+}
+
+/**
+ * Your MyLinkedList object will be instantiated and called as such:
+ * MyLinkedList obj = new MyLinkedList();
+ * int param_1 = obj.get(index);
+ * obj.addAtHead(val);
+ * obj.addAtTail(val);
+ * obj.addAtIndex(index,val);
+ * obj.deleteAtIndex(index);
+ */
 ```
 
 ### [4.Leetcode725分割链表](https://leetcode-cn.com/problems/split-linked-list-in-parts/)
@@ -1409,35 +1411,36 @@ root = [1, 2, 3], k = 5
  * }
  */
 class Solution {
+    // 分割链表 
     public ListNode[] splitListToParts(ListNode root, int k) {
-	    	// 一共k份，每份的量为size/k + （1:0）
-	    	int len = 0;
-	    	ListNode node = root;
-	    	while(node!=null) {
-	    		len++;
-	    		node = node.next;
-	    	}
-	    	ListNode[] res = new ListNode[k];
-	    	int size = len/k;
-	    	int rem = len%k;
-	    	for(int i=0;i<k;i++) {
-	    		ListNode dummy = new ListNode(-1);
-	    		ListNode cur  = dummy;
-	    		// 多大
-	    		for(int j=0;j<size+(i<rem?1:0);j++) {
-	    			cur.next = new ListNode(root.val);
-                    cur = cur.next;
-	    			if(root!=null) {
-	    				root = root.next;
-	    			}
-	    		}
-	    		res[i] = dummy.next;
-	    		
-	    		
-	    	}
-	    	return res;
-	    	
-	    }
+        // 1.先计算size
+        ListNode head = root;
+        int count = 0;
+        while(head!=null){
+            count++;
+            head = head.next;
+        }
+        head = root;
+        // 结果存储
+        ListNode[] res = new ListNode[k];
+        // 一共k份  每份大小为size/k; 余数为多少
+        int size = count/k;
+        int rem  = count%k;
+        // 针对每一份
+        for(int i=0;i<k;i++){
+            ListNode dummy = new ListNode(-1);
+            ListNode cur = dummy;
+            for(int j=0;j<size+(i<rem?1:0);j++){
+                cur.next = new ListNode(root.val);
+                cur = cur.next;
+                if(root!=null){
+                    root = root.next;
+                }
+            }
+            res[i] = dummy.next;
+        }
+        return res;
+    }
 }
 ```
 
@@ -1479,26 +1482,30 @@ class Solution {
  */
 class Solution {
     public ListNode mergeInBetween(ListNode list1, int a, int b, ListNode list2) {
-        ListNode prev = list1;
-	    	// 开始
-	    	for(int i=1;i<a;i++) {
-	    		prev = prev.next;
-	    	}
-	    	ListNode next = prev.next;
-	    	// 继续走
-	    	for(int i=a;i<=b;i++) {
-	    		next = next.next;
-	    	}
-	    	// 第二个链表
-	    	ListNode h2 = list2;
-	    	ListNode t2 = list2;
-	    	while(t2.next!=null) {
-	    		t2 = t2.next;
-	    	}
-	    	// 拼接
-	    	prev.next = h2;
-	    	t2.next = next;
-	    	return list1;
+        // 删除节点＋哑结点
+        ListNode dummy = new ListNode(-1,list1);
+        //开始寻找结点
+        ListNode pre = dummy;
+        for(int i=0;i<a;i++){
+            pre = pre.next;
+        }
+        // 再接着走
+        ListNode next = pre;
+        for(int i=a;i<=b;i++){
+            next = next.next;
+        }
+        next = next.next;
+        //对list2遍历
+        ListNode h2 = list2;
+        ListNode tail2 = list2;
+        while(tail2.next!=null){
+            tail2 = tail2.next;
+        }
+        // 合并
+        pre.next = h2;
+        tail2.next = next;
+
+        return dummy.next;
     }
 }
 ```
@@ -1538,26 +1545,25 @@ class Solution {
  */
 class Solution {
     public ListNode swapNodes(ListNode head, int k) {
-        ListNode slow = head;
-	    	ListNode fast = head;
-	    	ListNode first = null;
-	    	ListNode second = null;
-	    	// 开始找一个k
-	    	for(int i=1;i<k;i++) {
-	    		fast = fast.next;
-	    	}
-	    	first = fast;
-	    	// 开始找第二个k
-	    	while(fast.next!=null) {
-	    		fast = fast.next;
-	    		slow = slow.next;
-	    	}
-	    	second = slow;
-	    	// 交换两个值
-	    	int temp = first.val;
-	    	first.val = second.val;
-	    	second.val = temp;
-	    	return head;
+       // 双指针的思路来找到倒数第k个结点
+       ListNode fast = head;
+       ListNode slow = head;
+       ListNode first = null;
+       ListNode second = null;
+       for(int i=1;i<k;i++){
+           fast = fast.next;
+       }
+       first = fast;
+       while(fast.next!=null){
+           slow = slow.next;
+           fast = fast.next;
+       }
+       second = slow;
+       // 交换的时候需要传链表的
+       int temp = first.val;
+       first.val = second.val;
+       second.val = temp;
+       return head;
     }
 }
 ```
@@ -1602,21 +1608,21 @@ G = [0, 3, 1, 4]
  * }
  */
 class Solution {
+    //对于G中的所有元素构成多少个head相连的子链表呢？
     public int numComponents(ListNode head, int[] G) {
         HashSet<Integer> hashset = new HashSet<>();
-	    	for(int num:G) {
-	    		hashset.add(num);
-	    	}
-	    	// 遍历
-	    	ListNode node = head;
-	    	int res = 0;
-	    	while(node!=null) {
-	    		if(hashset.contains(node.val)&&((node.next==null)|| !hashset.contains(node.next.val))) {
-	    			res++;
-	    		}
-	    		node = node.next;
-	    	}
-	    	return res;
+        for(int num:G){
+            hashset.add(num);
+        }
+        // 对其遍历
+        int res = 0;
+        while(head!=null){
+            if(hashset.contains(head.val)&&( (head.next==null) || (!hashset.contains(head.next.val)) )){
+                res++;
+            }
+            head = head.next;
+        }
+        return res;
     }
 }
 ```
@@ -1654,28 +1660,53 @@ class Solution {
  */
 class Solution {
     public void reorderList(ListNode head) {
-        if(head==null) {
-	        	return;
-	        }
-	        List<ListNode> list = new ArrayList<ListNode>();
-	        ListNode node = head;
-	        while(node!=null) {
-	        	list.add(node);
-	        	node = node.next;
-	        }
-	        // 开始
-	        int i = 0;
-	        int j = list.size()-1;
-	        while(i<j) {
-	        	list.get(i).next = list.get(j);
-	        	i++;
-	        	if(i==j) {
-	        		break;
-	        	}
-	        	list.get(j).next = list.get(i);
-	        	j--;
-	        }
-	        list.get(i).next = null;
+        // 1.找中间链表
+        ListNode mid = findMedium(head);
+        // 2.划分成两个链表
+        ListNode newHead = mid.next;
+        mid.next = null;
+        // 3.后面那个链表翻转
+        newHead = reverse(newHead);
+        //4.最后合并两个
+        merge(head,newHead);
+
+    }
+    public ListNode findMedium(ListNode head){
+        ListNode slow = head;
+        ListNode fast = head;
+        while(fast!=null&&fast.next!=null){
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;
+    }
+
+    // 翻转链表
+    public ListNode reverse(ListNode newHead){
+        ListNode pre = null;
+        ListNode next = null;
+        while(newHead!=null){
+            next = newHead.next;
+            newHead.next = pre;
+            pre = newHead;
+            newHead = next;
+        }
+        return pre;
+    }
+    // 合并两个链表
+    public void merge(ListNode before,ListNode after){
+        ListNode next1 = null;
+        ListNode next2 = null;
+        while(before!=null&&after!=null){
+            next1 = before.next;
+            next2 = after.next;
+            // 开始连接
+            before.next = after;
+            before = next1;
+
+            after.next = before;
+            after = next2;
+        }
     }
 }
 ```
@@ -1756,27 +1787,31 @@ class Solution {
  * }
  */
 class Solution {
+    // 移除未排序链表中的重复节点，保留最开始出现的结点
     public ListNode removeDuplicateNodes(ListNode head) {
-       if(head==null||head.next==null) {
-	    		return head;
-	    	}
-	    	HashSet<Integer> hashset = new HashSet<>();
-	    	ListNode dummy = new ListNode(-1);
-	    	dummy.next = head;
-	    	ListNode node = dummy;
-	    	while(node.next!=null) {
-	    		// 不包含该值
-	    		if(!hashset.contains(node.next.val)) {
-	    			hashset.add(node.next.val);
-	    			node = node.next;
-	    		}else {
-	    			// 包含该值
-	    			node.next = node.next.next;
-	    		}
-	    		
-	    	}
-	    	
-	    	return dummy.next;
+        // 用hashset来去重
+        HashSet<Integer> hashset = new HashSet<>();
+        // 新链表
+        ListNode dummy = new ListNode(-1);
+        dummy.next = head;
+        // 指针
+        ListNode l = dummy;
+        // 对其遍历
+        while(head!=null){
+            //判断
+            if(!hashset.contains(head.val)){
+                // hashset为空或者不包含该值
+                hashset.add(head.val);
+                l.next = head;
+                l = l.next;
+                head = head.next;
+            }else{
+                // 包含该值
+               head = head.next;
+               l.next = head;
+            }
+        }
+        return dummy.next;
     }
 }
 ```
@@ -1812,24 +1847,20 @@ class Solution {
  */
 class Solution {
     public int getDecimalValue(ListNode head) {
-        if(head.next==null) {
-	    		return head.val;
-	    	}
-	    	// 用栈来辅助
-	    	Stack<Integer> stack = new Stack<>();
-	    	while(head!=null) {
-	    		stack.push(head.val);
-	    		head = head.next;
-	    	}
-	    	// 结果存储
-	    	int res = 0;
-	    	int k = 0;
-	    	// 对栈进行遍历
-	    	while(!stack.isEmpty()) {
-	    		int temp = (stack.pop())*(int)Math.pow(2, k++); 
-	    		res += temp;
-	    	}
-	    	return res;
+        // 还是要逆序来存储
+        Stack<Integer> stack = new Stack<>();
+        while(head!=null){
+            stack.push(head.val);
+            head = head.next;
+        }
+        int res = 0;
+        int k = 0;
+        int temp = 0;
+        while(!stack.isEmpty()){
+            temp = stack.pop() * (int)Math.pow(2,k++);
+            res += temp;
+        }
+        return res;
     }
 }
 ```
@@ -1875,23 +1906,19 @@ class Node {
 
 class Solution {
     public Node copyRandomList(Node head) {
-        // 解题思路用hashMap
-	    	HashMap<Node,Node> hashMap = new HashMap<>();
-	    	Node node = head;
-	    	while(node!=null) {
-	    		hashMap.put(node,new Node(node.val));
-	    		node = node.next;
-	    	}
-	    	//继续赋值
-	    	node = head;
-	    	while(node!=null) {
-	    		hashMap.get(node).next = hashMap.get(node.next);
-	    		hashMap.get(node).random = hashMap.get(node.random);
-	    		node = node.next;	    		
-	    	}
-	    	
-	    	// 返回值
-	    	return hashMap.get(head);
+        HashMap<Node,Node> hashMap = new HashMap<>();
+        Node node = head;
+        while(node!=null){
+            hashMap.put(node,new Node(node.val));
+            node = node.next;
+        }
+        node = head;
+        while(node!=null){
+            hashMap.get(node).next = hashMap.get(node.next);
+            hashMap.get(node).random = hashMap.get(node.random);
+            node = node.next;
+        }
+        return hashMap.get(head);
     }
 }
 ```
@@ -1983,35 +2010,40 @@ class Node {
 */
 
 class Solution {
+    // 用栈来解决该问题由prev和next记录
     public Node flatten(Node head) {
-	        if(head==null) {
-	        	return head;
-	        }
-	        Node dummy = new Node(-1,null,head,null);
-	        Node prev = dummy;
-	        Node cur = dummy;
-	        // 用栈
-	        Deque<Node> stack = new ArrayDeque<>();
-	        stack.push(head);
-	        while(!stack.isEmpty()) {
-	        	cur = stack.pop();
-	        	
-	        	prev.next = cur;
-	        	cur.prev = prev;
-	        	
-	        	if(cur.next!=null) {
-	        		stack.push(cur.next);
-	        	}
-	        	if(cur.child!=null) {
-	        		stack.push(cur.child);
-	        		cur.child = null;
-	        	}
-	        	prev = cur;
-	        }
-	        dummy.next.prev = null;
-	       return dummy.next;
-	        
-	    }
+        if(head==null){
+            return head;
+        }
+        // val prev next和child
+        Node dummy = new Node(-1,null,head,null);
+        // 记录当前的指针
+        Node cur = dummy;
+        Node prev = dummy;
+        // 用栈
+        Stack<Node> stack = new Stack<>();
+        stack.push(head);
+        while(!stack.isEmpty()){
+            cur = stack.pop();
+            
+            // 开始记录
+            prev.next = cur;
+            cur.prev = prev;
+            if(cur.next!=null){
+                stack.push(cur.next);
+            }
+
+            if(cur.child!=null){
+                stack.push(cur.child);
+                // 置为空
+                cur.child = null;
+            }
+            prev = cur;
+        }
+        // 重新整理
+        dummy.next.prev = null;
+        return dummy.next;
+    }
 }
 ```
 
@@ -2053,24 +2085,32 @@ class Solution {
  * }
  */
 class Solution {
+    // 删去总和为0的连续结点
     public ListNode removeZeroSumSublists(ListNode head) {
-        // 类似于前缀和 连续的和
-	    	HashMap<Integer,ListNode> hashMap = new HashMap<>();
-	    	ListNode dummy = new ListNode(0);
-	    	dummy.next = head;
-	    	int sum = 0;
-	    	// 对其遍历
-	    	for(ListNode node=dummy;node!=null;node=node.next) {
-	    		sum += node.val;
-	    		hashMap.put(sum,node);
-	    	}
-	    	// 第二次遍历
-	    	sum = 0;
-	    	for(ListNode node=dummy;node!=null;node=node.next) {
-	    		sum += node.val;
-	    		node.next = hashMap.get(sum).next;
-	    	}
-	    	return dummy.next;
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+        ListNode l = dummy;
+        // hashmap存储前缀和
+        HashMap<Integer,ListNode> hashMap = new HashMap<>();
+        int preSum = 0;
+        // 遍历 
+        while(l!=null){
+            preSum += l.val;
+            hashMap.put(preSum,l);
+            //继续走
+            l = l.next;
+        }
+        // 再次开始查找
+        l = dummy;
+        preSum = 0;
+        while(l!=null){
+            preSum += l.val;
+            if(hashMap.containsKey(preSum)){
+                l.next = hashMap.get(preSum).next;
+            }
+            l = l.next;
+        }
+        return dummy.next;
     }
 }
 ```
@@ -2326,24 +2366,29 @@ class Solution {
  */
 class Solution {
     public int[] nextLargerNodes(ListNode head) {
-        // 先将其转为数组
-			List<Integer> list = new ArrayList<Integer>();
-			while(head!=null) {
-				list.add(head.val);
-				head = head.next;
-			}
-			// 单调栈
-			Stack<Integer> stack = new Stack<>();
-			int[] res = new int[list.size()];
-			for(int i=0;i<list.size();i++) {
-				while(!stack.isEmpty()&&list.get(i)>list.get(stack.peek())) {
-					int index = stack.pop();
-					res[index] = list.get(i);
-				}
-				
-				stack.push(i);
-			}
-	    	return res;
+        // 链表的下一个更大元素是什么
+        Stack<Integer> s_data = new Stack<>();
+        while(head!=null){
+            s_data.push(head.val);
+            head = head.next;
+        }
+        // 另外一个栈来作为单调栈
+        Stack<Integer> s = new Stack<>();
+        // 结果存储
+        int[] res = new int[s_data.size()];
+        int index = s_data.size()-1;
+        while(!s_data.isEmpty()){
+            int data = s_data.pop();
+            // 出栈
+            while(!s.isEmpty()&&data>=s.peek()){
+                s.pop();
+            }
+            // 结果记录
+            res[index--] = s.isEmpty()?0:s.peek();
+            // 入栈
+            s.push(data);
+        }
+        return res;
     }
 }
 ```
@@ -2402,35 +2447,34 @@ class Solution {
  *     }
  * }
  */
+ // 有序链表转为二叉搜索树
 class Solution {
     public TreeNode sortedListToBST(ListNode head) {
-        // 排序好的找中点
-	    	// 递归截止条件
-	    	if(head==null) {
-	    		return null;
-	    	}
-	    	if(head.next==null) {
-	    		return new TreeNode(head.val);
-	    	}
-	    	// 开始找
-	    	ListNode slow = head;
-	    	ListNode fast = head;
-	    	ListNode pre = null;
-	    	while(fast!=null&&fast.next!=null) {
-	    		fast = fast.next.next;
-	    		pre = slow;
-	    		slow = slow.next;
-	    	}
-	    	// 分割出左链表
-	    	pre.next = null;
-	    	// 分割出右链表
-	    	ListNode rigthList = slow.next;
-	    	// 中间用于构造根节点
-	    	TreeNode root = new TreeNode(slow.val);
-	    	root.left = sortedListToBST(head);
-	    	root.right = sortedListToBST(rigthList);
-	    	return root;
+        return dfs(head,null);
     }
+
+    public TreeNode dfs(ListNode head,ListNode tail){
+        if(head==tail){
+            return null;
+        }
+        // 中间的点
+        ListNode medium = findMedium(head,tail);
+        TreeNode root = new TreeNode(medium.val);
+        root.left = dfs(head,medium);
+        root.right = dfs(medium.next,tail);
+        return root;
+
+    }
+    public ListNode findMedium(ListNode left,ListNode right){
+        ListNode slow = left;
+        ListNode fast = left;
+        while(fast!=right&&fast.next!=right){
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+        return slow;
+    }
+
 }
 ```
 
@@ -2483,31 +2527,36 @@ class Solution {
  * }
  */
 class Solution {
-     public boolean isSubPath(ListNode head, TreeNode root) {
-	    	// 递归+模拟
-	    	if(root==null) {
-	    		return false;
-	    	}
-	    	if(check(head,root)) {
-	    		return true;
-	    	}
-	    	return isSubPath(head,root.left)|| isSubPath(head, root.right);
-	    }
-	    public boolean check(ListNode head, TreeNode root) {
-	    	// 都遍历结束了
-	    	if(head==null) {
-	    		return true;
-	    	}
-	    	// 还未遍历完  树就没了
-	    	if(root==null) {
-	    		return false;
-	    	}
-	    	// 还没遍历完 就不相等
-	    	if(head.val!=root.val) {
-	    		return false;
-	    	}
-	    	return check(head.next,root.left)||check(head.next,root.right);
-	    }
+    // 二叉树中的列表 子树的解题思路
+    public boolean isSubPath(ListNode head, TreeNode root) {
+        if(head==null){
+            return true;
+        }
+        if(root==null){
+            return false;
+        }
+        if(check(head,root)){
+            return true;
+        }
+        return isSubPath(head,root.left) || isSubPath(head,root.right);
+    }
+
+    public boolean check(ListNode head,TreeNode root){
+        // 第一个是
+        if(head==null){
+            return true;
+        }
+        if(root==null){
+            return false;
+        }
+        if(head.val!=root.val){
+            return false;
+        }
+        return check(head.next,root.left) || check(head.next,root.right);
+    }
+
+
+
 }
 ```
 
@@ -2600,53 +2649,62 @@ public class MergeSort {
  * }
  */
 class Solution {
-		public ListNode sortList(ListNode head) {
+    // 排序链表-归并排序
+    public ListNode sortList(ListNode head) {
+        if(head==null || head.next==null){
+            return head;
+        }
+        // 开始归并排序
         return mergeSort(head,null);
     }
+    // 归并排序
     public ListNode mergeSort(ListNode head,ListNode tail){
-        // 截止条件
-        if(head==null){
-            return null;
-        }
+        // 归并排序
+        // 递归结束条件
         if(head.next==tail){
             head.next = null;
             return head;
         }
-
-        // 找mid
-        // 快慢指针
-        ListNode slow = head,fast = head;
+        // 找中间的结点
+        ListNode slow = head;
+        ListNode fast = head;
         while(fast!=tail&&fast.next!=tail){
             slow = slow.next;
             fast = fast.next.next;
         }
         ListNode mid = slow;
+        // 归并排序
         ListNode left = mergeSort(head,mid);
         ListNode right = mergeSort(mid,tail);
-        ListNode sorted =  merge(left,right);
+        // 合并
+        ListNode sorted = merge(left,right);
         return sorted;
     }
-
-    // 合并两个有序链表
-    public ListNode merge(ListNode head1,ListNode head2){
+    // 两个链表合并
+    public ListNode  merge(ListNode l1,ListNode l2){
         ListNode dummy = new ListNode(-1);
-        ListNode pre = dummy;
-
-        while(head1!=null&&head2!=null){
-            if(head1.val<head2.val){
-                pre.next = head1;
-                head1 = head1.next;
-                pre = pre.next;
+        ListNode l = dummy;
+        while(l1!=null&&l2!=null){
+            if(l1.val>l2.val){
+                l.next = l2;
+                l = l.next;
+                l2 = l2.next;
             }else{
-                pre.next = head2;
-                head2 = head2.next;
-                pre = pre.next;
+                l.next = l1;
+                l = l.next;
+                l1 = l1.next;
             }
         }
-
-        pre.next = head1!=null?head1:head2;
+        if(l1!=null){
+            l.next = l1;
+        }
+        if(l2!=null){
+            l.next = l2;
+        }
         return dummy.next;
+
     }
+
 }
 ```
 
@@ -2806,14 +2864,12 @@ public static int lastRemaining(int n, int m) {
     }
 
     List<Integer> list = new LinkedList<>();
-    for (int i = 0; i < n; i++) {
+    for (int i = 1; i <=n; i++) {
         list.add(i);
     }
 
     // 要删除元素的位置
     int idx = 0;
-    // 开始计数的位置
-    int start = 0;
 
     while (list.size() > 1) {
 
