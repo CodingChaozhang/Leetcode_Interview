@@ -246,11 +246,13 @@ class Solution {
         int mid = 0;
         while(left<=right){
             mid = left + ((right-left)>>1);
-            // 查看
+            // 比较
             if(nums[mid]>=nums[right]){
-                left = mid+1;
+                // 右边小，且mid比右边大，那么mid不是了
+                left = mid + 1;
             }else if(nums[mid]<nums[right]){
-               right = mid;
+                // 左边小，那么在左边 mid有可能是
+                right = mid;
             }
         }
         // 返回最小值
@@ -462,40 +464,40 @@ class Solution {
     public int search(int[] arr, int target) {
         return binarySearch(arr,target);
     }
-    // 二分查找
+
     public int binarySearch(int[] nums,int target){
         int left = 0;
         int right = nums.length-1;
         while(left<=right){
-            // 左边界
+            // 最边界
             if(nums[left]==target){
                 return left;
             }
-
             int mid = left + ((right-left)>>1);
-            // 接着判断
+            //继续判断
             if(nums[mid]==target){
+                // 保证最边界
                 right = mid;
             }else if(nums[mid]>nums[left]){
                 // 左边有序
-                if(nums[left]<target&&target<nums[mid]){
-                    right = mid -1;
+                if(nums[left]<=target&&target<nums[mid]){
+                    right = mid-1;
                 }else{
-                    left = mid + 1;
+                    left = mid+1;
                 }
             }else if(nums[mid]<nums[left]){
                 // 右边有序
                 if(nums[mid]<target&&target<=nums[right]){
-                    left = mid + 1;
+                    left = mid+1;
                 }else{
                     right = mid-1;
                 }
             }else if(nums[mid]==nums[left]){
+                // 可能重复
                 left++;
             }
         }
         return -1;
-
     }
 }
 ```

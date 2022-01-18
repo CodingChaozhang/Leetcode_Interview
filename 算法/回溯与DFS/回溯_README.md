@@ -184,6 +184,51 @@ class Solution {
 }
 ```
 
+```java
+class Solution {
+    // 全部结果
+    List<List<Integer>> res = new ArrayList<>();
+    public List<List<Integer>> permute(int[] nums) {
+        // 列出全部的可能性
+        if(nums.length==0){
+            return res;
+        }
+        // 回溯 
+        List<Integer> list = new ArrayList<>();
+        // 回溯,存储本次的临时值
+        dfs(nums,list);
+        return res;
+    }
+
+    // dfs算法
+    public void dfs(int[] nums,List<Integer> list){
+        // 符合结果
+        if(list.size()==nums.length){
+            // 需要重新new一下
+            res.add(new ArrayList<>(list));
+            return;
+        }
+        //状态
+        for(int i=0;i<nums.length;i++){
+            // 值只能用一次
+            if(list.contains(nums[i])){
+                continue;
+            }
+
+            // 选择
+            list.add(nums[i]);
+            // 回溯
+            dfs(nums,list);
+
+            list.remove(list.size()-1);
+        }
+
+    } 
+}
+```
+
+
+
 ### [2.Leetcode047 全排列II](https://leetcode-cn.com/problems/permutations-ii/)
 
 给定一个可包含重复数字的序列 nums ，按任意顺序 返回所有不重复的全排列。
@@ -699,7 +744,7 @@ class Solution {
 }
 ```
 
-## 五、回溯经典问题
+## 五、回溯应用问题
 
 ### [1.Leetcode051 N皇后](https://leetcode-cn.com/problems/n-queens/)
 
@@ -794,6 +839,83 @@ class Solution {
             list.add(new String(chess[i]));
         }
         return list;
+
+    }
+}
+```
+
+### [2.Leetcode93复原IP地址](https://leetcode-cn.com/problems/restore-ip-addresses/)
+
+给定一个只包含数字的字符串，用以表示一个 IP 地址，返回所有可能从 s 获得的 有效 IP 地址 。你可以按任何顺序返回答案。
+
+有效 IP 地址 正好由四个整数（每个整数位于 0 到 255 之间组成，且不能含有前导 0），整数之间用 '.' 分隔。
+
+例如："0.1.2.201" 和 "192.168.1.1" 是 有效 IP 地址，但是 "0.011.255.245"、"192.168.1.312" 和 "192.168@1.1" 是 无效 IP 地址。
+
+ 
+
+示例 1：
+
+输入：s = "25525511135"
+输出：["255.255.11.135","255.255.111.35"]
+示例 2：
+
+输入：s = "0000"
+输出：["0.0.0.0"]
+
+> 回溯解题
+
+```java
+class Solution {
+    List<String> res = new ArrayList<>();
+    public List<String> restoreIpAddresses(String s) {
+        // 临时存储结果
+        int[] arr = new int[4];
+        // 一个是s的开端 一个是arr的开端
+        dfs(s,arr,0,0);
+        return res;
+    }
+    // 回溯
+    public void dfs(String s,int[] arr,int s_start,int arr_start){
+        // 如果 都遍历到最后了
+        if(arr_start==arr.length){
+            if(s_start==s.length()){
+                // 开始转换
+                StringBuilder temp = new StringBuilder();
+                //
+                for(int i=0;i<arr.length;i++){
+                    temp.append(arr[i]);
+                    if(i!=arr.length-1){
+                        temp.append(".");
+                    }
+                }
+                res.add(temp.toString());
+            }
+            return;
+        }
+        // 其他截至条件
+        if(s_start==s.length()){
+            return;
+        }
+
+        // 如果是0的话
+        if(s.charAt(s_start)=='0'){
+            arr[arr_start] = 0;
+            dfs(s,arr,s_start+1,arr_start+1);
+        }        
+        // 遍历
+        // 数字
+        int digit = 0;
+        for(int i=s_start;i<s.length();i++){
+            digit = digit*10 + (s.charAt(i)-'0');
+            // 符合条件
+            if(digit>0&&digit<=0xFF){
+                arr[arr_start] = digit;
+                dfs(s,arr,i+1,arr_start+1);
+            }else{
+                break;
+            }
+        }
 
     }
 }
